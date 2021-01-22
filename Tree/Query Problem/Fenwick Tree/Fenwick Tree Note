@@ -1,0 +1,107 @@
+<Fenwick Tree Note>
+
+- 펜윅 트리는 RMQ 문제를 풀 때, 세그먼트 트리 외에 사용할 수 있는 자료구조이다.
+- 펜윅 트리는 합을 구할 때만 사용할 수 있는 자료구조이다.
+
+- 합을 구하는 경우에 세그먼트 트리의 오른쪽 자식은 모두 필요가 없다.
+- 세그먼트 트리에서 부모노드와 왼쪽 자식 노드를 알고 있다면, 오른쪽 자식 노드를 계산할 수 있기 때문이다.
+
+
+- L(i)를 i를 2진수로 나타냈을 때, 가장 마지막 1이 나타내는 값이라고 할 수 있다.
+ex) 9=1001(2)이므로 L(9)=1, 16=10000(2)이므로 L(16)=16
+- 마지막 1을 구하기 위한 연산은 num & (~num+1) = num & -num 이라고 할 수 있다.
+
+- 펜윅트리에서 tree[i]가 의미하는 것은 i까지 L(i)개의 합을 나타내는 것이다.
+ex) L(12)=4이므로 tree[12]=A[12]+A[11]+A[10]+A[9]
+
+- 결론적으로 tree[]는 세그먼트트리에서 오른쪽 자식을 모두 없앤 펜윅트리로 볼 수 있다.
+
+- 펜윅 트리는 구간의 합을 구할 수는 없지만, 1번째~i번째 수의 합은 구할 수 있다.
+ex) 13=1101(2), tree[13]=A[13] 
+-> tree[1101(2)]=tree[1100(2)]+tree[1000(2)], tree[13]=A[13]+tree[12]=A[13]+(A[12]+...+A[9])
+
+- i번째부터 j번째까지의 합을 구하고 싶으면 1~j번째를 펜윅트리를 이용해서 구한 후, 누적합을 이용하여 1~(i-1)의 구간합을 빼주면 된다.
+
+/*
+// code
+
+int sum(int i){
+    int answ=0;
+    while(i>0){
+        answ += tree[i];
+        i -= (i & -i);
+    }
+    return answ;
+}
+
+*/
+
+- 펜윅 트리가 누적합만 사용하는 것에 비해서 강점을 보이는 것은 값을 변경할 때이다.
+- 단, 쿼리당 문제를 해결하는 것은 누적합이 펜윅트리에 비해서 빠르다.
+- 선처리 연산은 update()를 이용해서 진행한다.
+/*
+// code
+
+int update(int i,int num){
+    while(i<=n){
+        tree[i] += num;
+        i += (i & -i);
+    }
+}
+
+int sum(int i){
+    int answ=0;
+    while(i>0){
+        answ += tree[i];
+        i -= (i & -i);
+    }
+    return answ;
+}
+
+void update(vector<int> &tree, int i, int diff) {
+    while (i <= l) {
+        tree[i] += diff;
+        i += (i & -i);
+    }
+}
+int sum(vector<int> &tree, int i) {
+    int ans = 0;
+    while (i > 0) {
+        ans += tree[i];
+        i -= (i & -i);
+    }
+    return ans;
+}
+
+int sum(vector<int>&tree, int i,int r){
+    if(i>r) return 0;
+    return sum(tree,r)-sum(tree,i-1);
+}
+
+*/
+
+
+===========================================================================
+< 2D Fenwick Tree >
+
+- 1차원을 2차원으로 확장하여서 만들 수 있다.
+- 행에 대해서, 그리고 열에 대해서 트리를 만들면 된다.
+
+/*
+// code
+
+void update(int x,int val){
+    for(int i=x;i<=n;i+=i&-i){
+        tree[i] += val;
+    }
+}
+
+int sum(int x){
+    int answ=0;
+    for(int i=x;i>0;i-=i&-i){
+        answ += tree[i];
+    }
+    return answ;
+}
+
+*/

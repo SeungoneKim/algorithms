@@ -1,0 +1,265 @@
+<MCMF Note>
+
+- 일반적인 네트워크 플로우 그래프에서 우리가 다루던 것은, cap(u,v)와 flow(u,v)이다.
+
+- MCMF문제에서는 u->v 간선에 대해서 비용 cost(u,v)의 정보가 추가가 된다.
+- u->v 간선의 총 비용은 flow(u,v)*cost(u,v)가 된다.
+
+- 만약 MCMF문제에서 capacity에 대한 제한이 사라지면 최단거리문제가 되고, 모든 cost가 0이라면 일반적인 최대유량문제가 된다.
+- 즉, s->t로 가는 경로가 존재하는지 찾는 문제가 아니라, s->t로 가는 최소 비용 경로를 찾는 문제이다.
+- 최단 경로를 연속해서 찾으면 문제를 해결할 수 있다. (Successive Shortest Path Algorithm)
+
+1. 최소 비용으로 s->t로 갈 수 있는 경로를 찾는다.
+2. 1에서 찾은 최단 경로로 물을 흘려보낸다.
+3. t로 물이 가지 못할 때 까지 1,2 과정을 반복한다. (총 비용과 흘러보낸 양을 누적시키면 된다.)
+
+/*
+// code
+
+struct MCMF {
+    struct Edge {
+        int to;
+        int capacity;
+        int cost;
+        Edge *rev;
+        Edge(int to, int capacity, int cost) : to(to), capacity(capacity), cost(cost) {
+        }
+    };
+    int n;
+    int source, sink;
+    vector<vector<Edge *>> graph;
+    vector<bool> check;
+    vector<int> distance;
+    vector<pair<int,int>> from;
+    int inf = 10000000;
+    MCMF(int n, int source, int sink) : n(n), source(source), sink(sink) {
+        graph.resize(n);
+        check.resize(n);
+        from.resize(n, make_pair(-1,-1));
+        distance.resize(n);
+    };
+    void add_edge(int u, int v, int cap, int cost) {
+        Edge *ori = new Edge(v,cap,cost);
+        Edge *rev = new Edge(u,0,-cost);
+        ori->rev = rev;
+        rev->rev = ori;
+        graph[u].push_back(ori);
+        graph[v].push_back(rev);
+    }
+    void add_edge_from_source(int v, int cap, int cost) {
+        add_edge(source, v, cap, cost);
+    }
+    void add_edge_to_sink(int u, int cap, int cost) {
+        add_edge(u, sink, cap, cost);
+    }
+    bool spfa(int &total_flow, int &total_cost) {
+        fill(check.begin(), check.end(), false);
+        fill(distance.begin(), distance.end(), inf);
+        fill(from.begin(), from.end(), make_pair(-1,-1));
+        distance[source] = 0;
+        queue<int> q;
+        q.push(source);
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+            check[x] = false;
+            for (int i=0; i<graph[x].size(); i++) {
+                auto e = graph[x][i];
+                int y = e->to;
+                if (e->capacity > 0 && distance[x] + e->cost < distance[y]) {
+                    distance[y] = distance[x] + e->cost;
+                    from[y] = make_pair(x,i);
+                    if (!check[y]) {
+                        check[y] = true;
+                        q.push(y);
+                    }
+                }
+            }
+        }
+        if (distance[sink] == inf) {
+            return false;
+        }
+        int x = sink;
+        int c = graph[from[x].first][from[x].second]->capacity;
+        while (from[x].first != -1) {
+            if (c > graph[from[x].first][from[x].second]->capacity) {
+                c = graph[from[x].first][from[x].second]->capacity;
+            }
+            x = from[x].first;
+        }
+        x = sink;
+        while (from[x].first != -1) {
+            Edge *e = graph[from[x].first][from[x].second];
+            e->capacity -= c;
+            e->rev->capacity += c;
+            x = from[x].first;
+        }
+        total_flow += c;
+        total_cost += c*distance[sink];
+        return true;
+    }
+    pair<int,int> flow() {
+        int total_flow = 0;
+        int total_cost = 0;
+        while (spfa(total_flow, total_cost));
+        return make_pair(total_flow, total_cost);
+    }
+};
+
+*/
+
+- MCMF 알고리즘을 설계할 때, 그래프에 음수 가중치가 나올 수 있다면, 벨만 포드나 SPFA를 사용해서 MCMF 알고리즘을 설계해야한다.
+- 음수 사이클이 등장하지 않는다면 다익스트라 알고리즘을 사용하는 것이 시간적으로 더 이점이 있다.
+
+/*
+// code
+
+struct MCMF {
+    struct Edge {
+        int to;
+        int capacity;
+        int cost;
+        Edge *rev;
+        Edge(int to, int capacity, int cost) : to(to), capacity(capacity), cost(cost) {
+        }
+    };
+    typedef pair<int,int> Vertex;
+    int n;
+    int source, sink;
+    vector<vector<Edge *>> graph;
+    vector<bool> check;
+    vector<int> distance;
+    vector<int> potential;
+    vector<pair<int,int>> from;
+    int inf = 10000000;
+    MCMF(int n, int source, int sink) : n(n), source(source), sink(sink) {
+        graph.resize(n);
+        check.resize(n);
+        from.resize(n, make_pair(-1,-1));
+        distance.resize(n);
+        potential.resize(n);
+    };
+    void add_edge(int u, int v, int cap, int cost) {
+        Edge *ori = new Edge(v,cap,cost);
+        Edge *rev = new Edge(u,0,-cost);
+        ori->rev = rev;
+        rev->rev = ori;
+        graph[u].push_back(ori);
+        graph[v].push_back(rev);
+    }
+    void add_edge_from_source(int v, int cap, int cost) {
+        add_edge(source, v, cap, cost);
+    }
+    void add_edge_to_sink(int u, int cap, int cost) {
+        add_edge(u, sink, cap, cost);
+    }
+    bool spfa() {
+        fill(check.begin(), check.end(), false);
+        fill(distance.begin(), distance.end(), inf);
+        distance[source] = 0;
+        queue<int> q;
+        q.push(source);
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+            check[x] = false;
+            for (int i=0; i<graph[x].size(); i++) {
+                auto e = graph[x][i];
+                int y = e->to;
+                if (e->capacity > 0 && distance[x] + e->cost < distance[y]) {
+                    distance[y] = distance[x] + e->cost;
+                    from[y] = make_pair(x,i);
+                    if (!check[y]) {
+                        check[y] = true;
+                        q.push(y);
+                    }
+                }
+            }
+        }
+        for (int i=0; i<n; i++) {
+            potential[i] = distance[i];
+        }
+        return true;
+    }
+    bool dijkstra(int &total_flow, int &total_cost) {
+        priority_queue<Vertex, vector<Vertex>, greater<Vertex>> q;
+        fill(distance.begin(), distance.end(), inf);
+        fill(check.begin(), check.end(), false);
+        fill(from.begin(), from.end(), make_pair(-1,-1));
+        distance[source] = 0;
+        q.push(make_pair(0, source));
+        while (!q.empty()) {
+            int x = q.top().second;
+            q.pop();
+            if (check[x]) {
+                continue;
+            }
+            check[x] = true;
+            if (x == sink) {
+                continue;
+            }
+            for (int i=0; i<graph[x].size(); i++) {
+                auto e = graph[x][i];
+                int y = e->to;
+                if (e->capacity > 0 && distance[y] > distance[x] + e->cost - potential[y] + potential[x]) {
+                    distance[y] = distance[x] + e->cost - potential[y] + potential[x];
+                    from[y] = make_pair(x,i);
+                    q.push(make_pair(distance[y],y));
+                }
+            }
+        }
+        if (distance[sink] == inf) {
+            return false;
+        }
+        for (int i=0; i<n; i++) {
+            if (distance[i] != inf) {
+                potential[i] += distance[i];
+            }
+        }
+        int x = sink;
+        int c = graph[from[x].first][from[x].second]->capacity;
+        while (from[x].first != -1) {
+            if (c > graph[from[x].first][from[x].second]->capacity) {
+                c = graph[from[x].first][from[x].second]->capacity;
+            }
+            x = from[x].first;
+        }
+        x = sink;
+        while (from[x].first != -1) {
+            Edge *e = graph[from[x].first][from[x].second];
+            e->capacity -= c;
+            e->rev->capacity += c;
+            total_cost += e->cost * c;
+            x = from[x].first;
+        }
+        total_flow += c;
+        return true;
+    }
+    pair<int,int> flow() {
+        int total_flow = 0;
+        int total_cost = 0;
+        spfa();
+        while (dijkstra(total_flow, total_cost));
+        return make_pair(total_flow, total_cost);
+    }
+};
+
+*/
+
+
+- MCMF 문제를 풀 때, 최대 비용을 구해야하는 경우에는 -를 붙여서 최소비용문제로 바꾼 후, 나중에 출력할 정답에만 다시 -를 붙여주면 된다.
+
+
+- 1->N으로 갔다가 N->1로 돌아오는데 비용과 유량이 주어진 그래프를 생각해보자.
+- 만약 1->N으로 가는 최단 경로를 찾는 문제라면 다익스트라 알고리즘을 사용해서 해결할 수 있다.
+- 최단경로를 2개 이상 찾는 문제라면, '소스노드를 1, 싱크노드를 N과 연결하고', 간선의 용량을 지날 수 있는 횟수, 비용을 간선의 가중치로 한 후, MCMF를 이용하면 된다.
+- 소스노드와 싱크노드를 별도로 마련하는 것은 찾으려는 최단경로의 개수를 정하기 위함이다.
+
+
+- 시간이 지나는 상황에서 어떠한 조건이 주어질 때, 최대 이익을 구하는 상황을 생각해보자.
+- 어떠한 조건을 채택하지 않고 pass하면 cost 0으로 다음 날로 넘어가도록 네트워크 그래프를 설계한다.
+- 어떠한 조건을 채택하면 특정 조건에서의 비용을 고려하고, 뒤의 날로 넘어가도록 네트워크 그래프를 설계한다.
+
+
+- 그래프가 주어졌을 때, 이분 그래프로 바꾸지 않고 그래프를 이용해서 MCMF 문제를 해결해야하면 시작점에 해당되는 노드들과 끝점에 해당되는 노드들을 각각 소스노드와 싱크노드에 연결시켜준다.
+- 최대한 많은 정점을 지나가게 하기 위해서는 노드를 반으로 나눈 후, 비용을 -1로 하면 된다.

@@ -1,0 +1,168 @@
+<LCA Note>
+- LCA는 임의의 두 노드 사이에 가장 가까운 공통 조상을 의미한다.
+
+- BFS나 DFS로 할 수 있는 작업들을 LCA를 구하는 알고리즘을 이용하면 풀 수 있다.
+-> query의 개수가 매우 많은 경우에는 LCA를 이용해 배열을 채워서 query에 대답하는 것이 시간복잡도를 크게 줄일 수 있다.
+
+- LCA를 찾는 알고리즘은 다음과 같다.
+
+===============================================================================
+<방법1>
+
+예비작업) 그래프처럼 adjlist에 입력을 받은 후, dfs나 bfs로 depth[],parent[]를 채운다.
+1. 깊이가 a, b인 두 노드에 대해서 더 깊은 노드가 다른 노드와 깊이가 같아질 때까지 조상을 찾는다.
+2. 깊이가 같을 때부터, 두 노드 모두 조상으로 갱신해준다.
+3. 루트노드에 도달하기 전에 찾으면 LCA이고, 루트노드에 도달하면 루트노드가 LCA이다.
+
+- 시간복잡도는 O(h)이다.
+- 일반적인 트리에 대해서는 높이의 최대값이 N이므로 시간복잡도가 O(N)이다.
+
+/*
+//code
+int parent[]
+int depth[]
+
+int lca(int u, int v){
+    if(depth[u]<depth[v]){
+        swap(u,v);
+    }
+    while(depth[u]!=depth[v]){
+        u=parent[u];
+    }
+    while(u!=v){
+        u=parent[u];
+        v=parent[v];
+    }
+    return u;
+}
+*/
+
+- 트리는 사이클이 없는 그래프이므로 임의의 두 정점 사이에 경로가 1개밖에 없다.
+- 두 정점 사이의 거리를 구할 때, LCA를 이용하면 DFS/BFS를 이용하는 방법보다 시간을 줄일 수 있다.
+
+/*
+dist[i]= 루트에서 i까지의 거리
+
+u와 v사이의 거리 = dist[u]+dist[v]-2*dist[lca(u,v)]
+*/
+
+1. BFS와 DFS를 이용하여 dist[]배열을 채운다.
+2. lca를 구하고 나서, 위의 관계식을 이용한다.
+
+===============================================================================
+<방법2>
+
+- 다이나믹 프로그래밍을 이용하면, O(lgN)만에 lca를 구할 수 있다.
+/*
+p[i][j]= 노드 i의 2**j번째 조상
+
+//p[i][0]=parent[i]
+for(int i=1;i<=n;i++){
+    p[i][0]=parent[i];
+}
+
+//p[i][j]=p[p[i][j-1]][j-1]
+for(int j=1; (1<<j)<n; j++){
+    for(int i=1;i<=n;i++){
+        if(p[i][j-1] != 0){
+            p[i][j] = p[p[i][j-1]][j-1];
+        }
+    }
+}
+*/
+
+ 1. 두 노드의 레벨이 다르면, 같을 때까지 레벨이 큰 것을 2**k칸씩 위로 올리고, k를 1씩 감소시킨다.
+ 2. 두 노드의 레벨이 같아졌으면, 같은 노드가 되지 않을 때까지 2**k칸씩 둘 다 위로 올리고, k를 1씩 감소시킨다.
+ 3. 마지막으로 1칸 위로 올린다.
+
+ /*
+ //code
+
+int lca(int u, int v){
+    if(depth[u]<depth[v]){
+        swap(u,v);
+    }
+    // 현재 u가 v보다 깊이가 깊은 상태임.
+    int log=1;
+    for(log=1;(1<<log)<=depth[u];log++);
+    log--;
+
+    for(int i=log;i>=0;i--){
+        if(depth[u]-(1<<i)>=depth[v]){
+            u=p[u][i];
+        }
+    }
+    if(u==v){
+        return u;
+    }
+    else{
+        for(int i=log;i>=0;i--){
+            if(p[u][i] !=0 && p[u][i]!=p[v][i]){
+                u=p[u][i];
+                v=p[v][i];
+            }
+        }
+    }
+    return parent[u];
+}
+
+*/
+
+- 정리하면, BFS를 통해 O(N)으로 dist[],parent[],depth[],p[]를 채운다.
+- DP를 이용하여서 LCA를 O(MlgN)으로 구할 수 있다.
+- 총 시간복잡도는 O(N+MlgN)이다.
+
+===============================================================================
+<방법3>
+
+- DFS를 이용하면 다른방법을 구현할 수 있다.
+
+- tin[i]= dfs로 i를 방문할 때, 몇번째 였는지.
+- tout[i]= dfs로 i에서 나갈 때, 몇번째 였는지.
+ex) a->b->c로 갈 때, a의 in은 1, a의 out은 6.
+
+/*
+//code
+
+void dfs(int v, int parent){
+    tin[v]= ++ timer;
+    p[v][0]= parent;
+    for(int i=1;i<=l;i++){
+        p[v][i]=p[p[v][i-1]][i-1];
+    }
+    for(int to: a[v]){
+        if(to != parent){
+            dfs(to,v);
+        }
+    }
+    tout[v]= ++timer;
+}
+
+*/
+
+- tin, tout을 알고있다면, 임의의 두 노드 a,b에 대해서 a가 b의 조상인지 여부를 쉽게 알 수 있다.
+
+/*
+//code
+
+bool upper(int u, int v){
+    return (tin[u]<=tin[v]) && (tout[u]>=tout[v]);
+}
+
+int lca(int u, int v){
+    if(upper(u,v)) return u;
+    if(upper(v,u)) return v;
+    for(int i=l;i>=0;i--){
+        if(!upper(p[u][i],v)){
+            u=p[u][i];
+        }
+    }
+    return p[u][0];
+}
+*/
+
+- 이 방법을 이용하면 O(lgN)으로 마찬가지로 구현할 수 있다.
+- 방법2와 방법3은 시간복잡도가 같으니 취향에 맞게 선택하면 된다.
+
+
+- 문제를 응용하기 위해서, 간선에 가중치를 부여하거나, 루트노드를 바꾸는 방법으로 문제를 출제할 수 있다.

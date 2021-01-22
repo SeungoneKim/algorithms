@@ -1,0 +1,109 @@
+<Dinic Algorithm Note>
+
+- Dinic 알고리즘은 최대유량을 찾는 알고리즘이다.
+- Ford-Fulkerson 알고리즘과 Edmon Karp 알고리즘보다 최대유량을 찾는데 더 효율적인 알고리즘이다.
+
+- Dinic 알고리즘의 핵심은 BFS를 통해서 flow가 더 있는지 알아보기 위한 Level Graph를 만드는 것이다.
+- Level Graph는 소스노드에서 각 정점까지 가는 간선의 개수와 같은 의미를 가지고 있다.
+- Level Graph를 이용해서 여러 개의 flow를 한번에 흘려준다.
+
+- Level Graph를 만든 후에 DFS를 이용해서 Blocking Flow를 흘려준다.
+- 이는 소스 노드에서 싱크 노드로 가는 Augmenting Path를 찾는 것이다.
+
+
+1. Level Graph를 만든다.
+2. s->t로 가는 Augmenting Path를 찾는다.
+3. Augmenting Path에서 최솟값을 찾고, 이 때 정점을 b라고 한다.
+4. b->r로 가는 Augmenting Path를 찾는다.
+5. 더 이상 못 찾을때 까지 3,4단계를 반복한다.
+
+/*
+// code
+
+struct Dinic {
+    struct Edge {
+        int to, cap;
+        Edge *rev;
+        Edge(int to, int cap) : to(to), cap(cap) {
+        }
+    };
+    int n;
+    int source, sink;
+    vector<vector<Edge *>> graph;
+    vector<int> start;
+    vector<int> level;
+    Dinic(int n, int source, int sink) : n(n), source(source), sink(sink) {
+        graph.resize(n);
+        start.resize(n);
+        level.resize(n);
+    }
+    void add_edge(int u, int v, int cap) {
+        Edge *ori = new Edge(v, cap);
+        Edge *rev = new Edge(u, 0);
+        ori->rev = rev;
+        rev->rev = rev;
+        graph[u].push_back(ori);
+        graph[v].push_back(rev);
+    }
+    void add_edge_from_source(int v, int cap) {
+        add_edge(source, v, cap);
+    }
+    void add_edge_to_sink(int u, int cap) {
+        add_edge(u, sink, cap);
+    }
+    void bfs() {
+        fill(level.begin(), level.end(), -1);
+        queue<int> q;
+        level[source] = 0;
+        q.push(source);
+        while (!q.empty()) {
+            int x = q.front(); q.pop();
+            for (auto &e : graph[x]) {
+                int y = e->to;
+                int cap = e->cap;
+                if (cap > 0 && level[y] == -1) {
+                    level[y] = level[x] + 1;
+                    q.push(y);
+                }
+            }
+        }
+    }
+    int dfs(int x, int f) {
+        if (x == sink) return f;
+        for (int &i=start[x]; i<graph[x].size(); i++) {
+            auto &e = graph[x][i];
+            int y = e->to;
+            int cap = e->cap;
+            if (cap > 0 && level[y] == level[x]+1) {
+                int nf = cap;
+                if (f != -1 && nf > f) nf = f;
+                int t = dfs(y, nf);
+                if (t > 0) {
+                    e->cap -= t;
+                    e->rev->cap += t;
+                    return t;
+                }
+            }
+        }
+        return 0;
+    }
+    int flow() {
+        int ans = 0;
+        while (true) {
+            bfs();
+            if (level[sink] == -1) break;
+            fill(start.begin(), start.end(), 0);
+            while (true) {
+                int f = dfs(source, -1);
+                if (f > 0) {
+                    ans += f;
+                } else {
+                    break;
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+*/

@@ -1,0 +1,53 @@
+<Dynamic Programming Note>
+
+- 큰 문제를 작은 문제로 나누어서 푸는 알고리즘.
+
+- '분할정복'과 큰 문제를 작은 문제로 나누어서 푼다는 공통점이 있다.
+- 단, 다이나믹 프로그래밍은 분할정복과 달리 큰 문제가 작은 문제와 중복이 된다는 차이점이 있다.
+
+- 다시 말하면, '분할정복'은 절대로 중복이 일어나면 안된다.
+
+- 정리해서 말하면 '다이나믹 프로그래밍'의 두 가지 속성은 다음과 같다.
+1. Overlapping Subproblem(겹치는 부분문제)
+2. Optimal Substructure(최적부분구조) : 작은 문제에서 큰 문제의 답을 구할 수 있다.
+
+- '다이나믹 프로그래밍'의 가장 핵심적인 아이디어는 메모이제이션(Memoization)이다.
+- Optimal Substructure를 만족하므로, 같은 문제의 답은 항상 일정하고, 한번 구한 답을 어딘가에 저장하는 아이디어이다.
+
+- '다이나믹 프로그래밍'을 구현하는 두가지 방법은 다음과 같다.
+1. Top-Down Approach (재귀함수)
+2. Bottom-Up Approach (for문)
+
+/*
+//Top-Down Approach code
+
+int dp[1000]; // 전역배열
+int tdrf(int n){
+    //종료조건 & memoization check
+    if(n<=1) return n;
+    if(dp[n]>0) return dp[n];
+
+    //memoization할 배열에 재귀함수를 호출하여 값 채우기
+    dp[n] = tdrf(n-1)+tdrf(n-2);
+
+    //메모이제이션한 값을 리턴하면서 종료한다.
+    return dp[n];
+}
+
+
+//Bottom-Up Approach code
+
+int dp[1000]; // 전역배열
+
+// initailization
+dp[0]=0; dp[1]=1;
+
+// for문 : 작은 문제의 답은 이미 다 채워졌으므로, 이를 이용해 큰 문제의 답을 채운다.
+for(int k=2;k<=n;k++){
+    dp[i] = dp[i-1]+dp[i-2];
+}
+*/
+
+- Top-Down과 Bottom-Up중 어떤것이 더 빠른지는 문제마다 다르므로 알 수 없다.
+- Python에서는 스택 오버플로우가 자주 발생해 바텀업이 낫지만, C++과 Java는 상관없다.
+

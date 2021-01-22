@@ -1,0 +1,70 @@
+<Eulerian Path Note>
+
+- 오일러 경로는 모든 간선을 정확히 한번씩만 방문하는 경로이다.
+- 오일러 회로는 시작점과 끝점이 똑같은 오일러 경로이다.
+
+- 오일러 경로 또는 오일러 회로가 존재하는지는 무향그래프, 유향그래프에서 판별법이 각각 존재한다.
+
+- 무향그래프에서 오일러 회로가 존재하기 위해서는 모든 정점이 짝수의 degree를 가지고 있어야한다.
+- 유향그래프에서 오일러 회로가 존재하기 위해서는 모든 정점이 각각 같은 수의 in-degree와 out-degree를 가지고 있어야한다.
+- 무향그래프에서 오일러 경로가 존재하기 위해서는 모든 정점이 짝수의 degree를 가지고 있거나, 정확히 2개의 정점만이 홀수의 degree를 가지고 있어야한다.
+- 유향그래프에서 오일러 경로가 존재하기 위해서는 모든 정점이 각각 같은 수의 in-degree와 out-degree를 가지고 있거나,
+                한 정점만 outdegree-1==indegree && 다른 한 정점만 indegree-1==outdegree를 만족해야한다.
+
+- 문제에서 주어지는 그래프가 여러개의 Connected Component로 구성되어 있을 때는, 한 단위가 다른 단위에 영향을 주지 않는다.
+- singleton node나 자기자신으로 돌아오는 간선은 무시해도 된다.
+
+
+<Hierholzer's Algorithm>
+- 오일러회로,오일러경로를 찾기위한 알고리즘은 Hierholzer's Algorithm이 있다.
+
+1. 무향,유향그래프 여부에 따라서 오일러 회로가 존재하는지 판별법으로 확인하기 위해 indegree와 outdegree를 기록하는 배열을 두고 센다.
+2. 기록한 indegree, outdegree를 바탕으로 outdegree-1==indegree를 만족하는 시작점을 찾는다.
+3. 2와 마찬가지로 indegree-1==outdegree를 만족하는 끝점을 찾는다.
+4. 만약 2,3에서 모든 정점이 indegree와 outdegree가 같은 오일러경로 판별법을 만족한다면 모두 시도해봐야한다.
+5. 간선을 따라서 이동할때마다 outdegree 배열에서 1씩 빼면서 dfs를 진행한다.
+6. 5를 진행하다가 더이상 이동할 정점이 존재하지 않으면 solution[]이라는 stack 에 현재 노드를 기록하면서 backtracking을 진행한다.
+
+- Hierholzer's Algorithm은 모든 간선을 방문하므로 시간 복잡도는 O(E)이다.
+
+/*
+//code
+// 출처 : https://m.blog.naver.com/PostView.nhn?blogId=kks227&logNo=220800097205&proxyReferer=https:%2F%2Fwww.google.com%2F
+
+// 간선 구조체
+struct Edge{
+    int to, cnt; // to: 인접한 정점, cnt: 남은 사용 횟수
+    Edge *dual; // dual: 역방향 간선을 가리키는 포인터
+    Edge(): Edge(-1, 0){}
+    Edge(int to1, int cnt1): to(to1), cnt(cnt1), dual(nullptr){}
+};
+ 
+int N, degree[1000];
+vector<Edge*> adj[1000];
+bool visited[1000];
+ 
+// 컴포넌트별로 방문하는 dfs
+int dfs(int curr){
+    int result = 1;
+    visited[curr] = true;
+    for(Edge* e: adj[curr]){
+        int next = e->to;
+        if(!visited[next]) result += dfs(next);
+    }
+    return result;
+}
+ 
+// 오일러 회로를 출력하는 dfs
+void Eulerian(int curr){
+    for(Edge *e: adj[curr]){
+        if(e->cnt > 0){
+            // 순방향, 역방향 간선을 하나씩 지움
+            e->cnt--;
+            e->dual->cnt--;
+            // dfs
+            Eulerian(e->to);
+        }
+    }
+    printf("%d ", curr+1);
+}
+ 

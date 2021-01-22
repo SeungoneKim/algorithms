@@ -1,0 +1,27 @@
+<String Note>
+
+- 문자열 검색 알고리즘은 문자열 S에서 패턴 P를 찾는 알고리즘이다.
+- S에서 가장 먼저 나타나는 P를 찾아야한다.
+
+- 앞에서부터 선형적으로 1대1 대응시키는 방법이 있다.
+- 시간복잡도는 O(S*P)이다.
+
+/*
+// code
+int match(string s, string p){
+    int n= s.size(), m=p.size();
+    for(int i=0;i<=n-m;i++){
+        bool ok=true;
+        for(int j=0;j<m;j++){
+            if(s[i+j]!=p[j]){
+                ok=false;
+            }
+        }
+        if(ok) return i;
+    }
+    return -1;
+}
+
+*/
+
+- 이를 더 효율적으로 할 수 있는 방법은 라빈 카프 알고리즘, KMP가 있다.

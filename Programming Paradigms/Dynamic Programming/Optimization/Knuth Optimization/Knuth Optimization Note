@@ -1,0 +1,15 @@
+<Knuth Optimization Note>
+
+- cost에 해당하는 2차원 배열 C와 dp를 저장하는 배열 D가 있다고 하자.
+- knuth optimization을 이용하기 위해서는 다음 3가지 조건을 만족해야한다.
+
+1. dp식의 형태 : D[i][j] = min i<k<j (D[i][k] + D[k][j]) + C[i][j]
+2. 사각 부등식 : C[a][c]+C[b][d] <= C[a][d] + C[b][c] (a<=b<=c<=d)
+3. 단조성 : C[b][c] <= C[a][d] (a<=b<=c<=d)
+
+- knuth optimization은 O(n^3)의 다이나믹을 O(n^2)으로 줄여줄 수 있다.
+- 최적화 기법은 가장 안쪽 for문을 변경하여 다음과 같이 적용한다.
+
+D[i][j] = min i<=k<=j (D[i][k]+D[k][j])+C[i][j]
+range of k : A[i,j-1] <= A[i][j]==k <= A[i+1][j]
+(단, A는 D[i][j]를 최솟값으로 만들어주는 k를 저장한 배열이다)

@@ -1,0 +1,92 @@
+<DFS & BFS Note>
+
+- 그래프 탐색의 목적은 '임의의 정점에서 시작하여, 연결되어 있는 '모든 정점'을 '1번'씩 방문하는 것'이다.
+- CP에서 목표는 dfs,bfs를 함으로써 목적에 맞는 전역배열을 채우는 것이라 생각하면 편하다.
+
+- DFS와 BFS는 정점들을 방문하는 순서의 차이가 있다.
+DFS(Depth First Search) : 깊이 우선 탐색 (feat_재귀함수)
+BFS(Breadth First Search) : 너비 우선 탐색 (fear_큐)
+
+/*
+//DFS code implemented by matrix
+bool check[vertex];
+void dfs(int x){
+    // current vertex
+    check[x] = true;
+
+    // searching for next vertex
+    for(int i=1;i<=n;i++){
+        if(mat[x][i] == 1 && check[i] == false){
+            dfs(i);
+        }
+    }
+}
+
+//DFS code implemented by adjacentlist
+bool check[vertex];
+void dfs(int x){
+    // current vertex
+    check[x] = true;
+
+    // searching for next vertex
+    for(int i=1;i<=adjlist[x].size();i++){
+        int y= adjlist[x][i];
+        if(check[y]==false){
+            dfs(y);
+        }
+    }
+}
+
+// BFS code implemented by matrix
+queue<int> q;
+// initialization
+check[1]=true; q.push(1);
+
+while(!q.empty()){
+    // current vertex
+    int x= q.front(); q.pop();
+
+    // searching for next vertex
+    for(int i=1;i<=n;i++){
+        if(mat[x][i]==true && check[i]==false){
+            check[i]=true;
+            q.push(i);
+        }
+    }
+}
+
+// BFS code implemented by adjacentlist
+queue<int> q;
+//initialization
+check[1]=true; q.push(1);
+
+while(!q.empty()){
+    // current vertex
+    int x= q.front(); q.pop();
+
+    // searching for next vertex
+    for(int i=0;i<adjacentlist[x].size();i++){
+        int y = adjacentlist[x][i];
+        if(check[y]==false){
+            check[y]=true;
+            q.push(y);
+        }
+    }
+}
+*/
+
+- 그래프의 탐색 문제를 잘 푸는 핵심은 다음 아래 3가지와 같다.
+1. 방문 여부를 기록하는 check배열을 어떻게 다룰 것 인가
+-> bool으로만, 아니면 int로 status기록?(색깔정보 등등)
+
+2. graph내의 cycle을 어떻게 처리할 것 인가
+-> 몇번째로 방문했는지 기록하는 배열 check만들기?
+-> 몇번째 search cycle에서 방문했는지 기록하는 배열 which_search만들기?
+
+3. DFS와 BFS중 어떤 것을 선택할 것인가
+-> DFS : 사이클 찾기
+-> BFS : 최단경로
+
+- 그래프의 탐색 과정에서 신경 써줘야하는 부가적인 사항은 다음과 같다.
+1. 연결요소가 1개로만 이루어져 있는가
+-> 모든 정점에 대해서 dfs를 돌려볼지 결정!

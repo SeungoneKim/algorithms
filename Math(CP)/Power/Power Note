@@ -1,0 +1,56 @@
+<Power Note>
+
+- a의 b제곱을 빠르게 구해야 한다.
+
+/*
+//code
+
+int ans=1;
+for(int i=1;i<=b;i++){
+    ans = ans*a;
+}
+*/
+
+- 가장 직관적인 방법이지만 O(b)의 시간이 걸리고, 보다 빠른 방법이 필요하다.
+
+<방법1>
+- 분할정복을 이용해서 구할 수 있다.
+- a^b에서 b가 짝수라면(b=2c), (a^2c) = (a^c) * (a^c) 로 나눌 수 있다.
+- a^b에서 b가 홀수라면(b=2c+1), (a^2c+1) = (a^1) * (a^2c) 로 나눌 수 있다.
+/*
+//code
+
+int calc(int a, int b){
+    if(b==0) return 1;
+    else if(b==1) return a;
+    else if(b%2==0){
+        int temp=calc(a,b/2);
+        return temp*temp;
+    }
+    else{
+        return a*calc(a,b-1);
+    }
+}
+- 이 방법의 시간복잡도는 O(lg b)이다.
+- return(calc(a,b/2)*calc(a,b/2))으로 계산하면 2번 계산하므로 의미가 없고, 시간복잡도가 O(b)이므로 주의해야한다.
+
+
+<방법2>
+- 이진수의 원리를 이용해서도 구할 수 있다.
+/*
+//code
+
+int calc(int a, int b){
+    int ans=1;
+    while(b>0){
+        if(b%2==1){
+            ans *=a;
+        }
+        a = a*a;
+        b /=2;
+    }
+    return ans;
+}
+
+- 3^27=3^(16+8+2+1) 이므로, 3^16 * 3^8 * 3^2 * 3^1로 구하는 매커니즘이다.
+- 이 방법의 시간복잡도는 O(lg b)이다.

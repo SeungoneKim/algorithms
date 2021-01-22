@@ -1,0 +1,72 @@
+<Matrix DP Note>
+
+1. dp[n][a][b][c]는 3차원 행렬로 나타낼 수 있다.
+
+- 크기가 n*m인 배열 a[i][j]는 b[i*m+j]로 바꿀 수 있다.
+- 크기가 n*m*l인 배열 a[i][j][k]는 b[i*ml+j*l+k]로 바꿀 수 있다.
+
+// code
+
+using matrix = vector<vector<int>>;
+const int mod = 1000;
+matrix operator * (const matrix &a, const matrix &b) {
+    int n = a.size();
+    matrix c(n, vector<int>(n));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            for (int k=0; k<n; k++) {
+                c[i][j] += a[i][k] * b[k][j];
+                c[i][j] %= mod;
+            }
+        }
+    }
+    return c;
+}
+matrix operator + (const matrix &a, const matrix &b) {
+    int n = a.size();
+    matrix c(n, vector<int>(n));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            c[i][j] = a[i][j] + b[i][j];
+            c[i][j] %= mod;
+        }
+    }
+    return c;
+}
+matrix init(int n) {
+    matrix a(n, vector<int>(n));
+    for (int i=0; i<n; i++) {
+        a[i][i] = 1;
+    }
+    return a;
+}
+matrix matrix_pow(matrix a, long long k) {
+    if (k == 0) {
+        return init(a.size());
+    } else if (k % 2 == 0) {
+        return matrix_pow(a*a, k/2);
+    } else {
+        return a * matrix_pow(a, k-1);
+    }
+}
+matrix matrix_sum(matrix a, long long k) {
+    int n = a.size();
+    if (k == 0) {
+        matrix ans(n, vector<int>(n));
+        return ans;
+    } else if (k % 2 == 0) {
+        return (init(n) + matrix_pow(a, k/2)) * matrix_sum(a, k/2);
+    } else {
+        return matrix_sum(a, k-1) + matrix_pow(a, k);
+    }
+}
+void print(const matrix &a) {
+    int n = a.size();
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            cout << a[i][j] << ' ';
+        }
+        cout << '\n';
+    }
+}
+

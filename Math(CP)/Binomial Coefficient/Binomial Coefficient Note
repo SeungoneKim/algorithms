@@ -1,0 +1,35 @@
+<Binomial Coefficient Note>
+
+- n개 중에서 k개를 순서 없이 고르는 방법이다.
+- nCk
+
+- 시간복잡도는 O(N), N=max(n,k)이다.
+- n!은 값이 매우 기하급수적으로 커지는데 문제가 있다.
+
+- n!을 구하는데 overflow가 발생하는 문제를 해결하기 위한 방법은 파스칼의 삼각형이다.
+- 이는 이항 계수를 삼각형 모양으로 배열하는 방법이다.
+- n번째 줄에는 수를 n개 쓴다.
+- 윗 줄의 왼쪽 수와 오른쪽 수를 더해서 만든다.
+
+- i번째 줄의 j번째 수가 iCj를 의미하게 된다.
+- c[n][k] = c[n-1][k-1]+c[n-1][k]가 성립한다.
+- 이는 점화식의 관점에서도 설명이 가능한 다이나믹이다.
+- 이 방법은 시간복잡도가 O(N^2)이 된다.
+
+// code
+
+long long comb(int n, int k) {
+    if (k < 0 || k > n) return 0;
+    long long ans = fact[n];
+    ans = (ans * fact_inv[k]) % mod;
+    ans = (ans * fact_inv[n-k]) % mod;
+    return ans;
+}
+
+double comb(int n,int r)
+{
+    if(r==0||n==r)return 1.0;
+    double&ret=cache2[n][r];
+    if(ret!=-1.0)return ret;
+    return ret=comb(n-1,r-1)+comb(n-1,r);
+}

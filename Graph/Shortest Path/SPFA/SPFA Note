@@ -1,0 +1,55 @@
+<SPFA Note>
+
+- 벨만포드 알고리즘을 보다 빠르게 변형시칸 알고리즘이다.
+
+- 최악의 경우에는 벨만 포드와 시간복잡도가 O(VE)로 같지만, 평균적으로 O(E)이다.
+
+- MCMF를 공부할 때, SPFA가 사용된다.
+
+/*
+//code
+
+for(int j=0;j<n;j++){
+    for(int k=0;k<m;k++){
+        int from= edges[k].from;
+        int to=edges[k].to;
+        int cost=edges[k].cost;
+
+        if(dist[to]>dist[from]+cost){
+            dist[to]=dist[from]+cost;
+        }
+    }
+}
+*/
+
+- 모든 간선에 대해서 한번 업데이트 했을때, 이번 턴에서 업데이트되지 않는 정점은 다음턴에도 변하지 않을 것이다.
+- 이 점을 고려해, 이번 턴에서 바뀐 정점들은 모두 큐에 넣어서 다음번에 검사를 또 한다.
+
+/*
+// code
+for(int i=1;i<=n;i++){
+    d[i]=inf;
+}
+
+d[1]=0;
+queue<int>q;
+q.push(1);
+c[1]=true; // 큐에 들어갔는지 확인하는 배열
+
+while(!q.empty()){
+    int from= q.front();
+    c[from]=false; q.pop();
+    for(Edge &e:a[from]){
+        int to=e.to;
+        cost=e.cost;
+        if(d[to]>d[from]+cost){
+            d[to]=d[from]+cost;
+            if(c[to]==false){
+                q.push(to);
+                c[to]=true;
+            }
+        }
+    }
+}
+
+*/

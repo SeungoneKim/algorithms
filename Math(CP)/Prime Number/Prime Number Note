@@ -1,0 +1,86 @@
+<Prime Number Note>
+
+-소수와 관련된 알고리즘은 2가지이다.
+
+1. 어떤 수 N이 소수인지 아닌지 판별하는 방법
+2. N보다 작거나 같은 모든 자연수 중에서 소수를 찾아내는 방법
+
+방법 1
+
+- 어떤 수가 소수인지 아닌지 판별하기 위해서는 2~n/2로 나누어보아서 나누어지지 않으면 된다.
+- 이 방법은 시간복잡도가 O(N)이다.
+
+/* 
+// code
+
+bool checkprime(int num){
+    if(num<2) return flase;
+
+    for(int k=2;k<=num/2;k++){
+        if(num%k==0)
+            return false;
+    }
+
+    return true;
+}
+*/
+
+방법 2
+
+- 방법 1을 개선하면 2~root(n)으로 나누어보아서 나누어지지 않으면 된다.
+- 이 방법의 시간복잡도는 O(root(N))이다.
+
+/* 
+// code
+
+bool checkprime(int num){
+    if(num<2) return false;
+
+    for(int k=2;k*k<=n;k++){ // sqrt(n)을 사용하지 않음
+        if(num%k==0)
+            return false;
+    }
+
+    return true;
+}
+*/
+
+2. N보다 작거나 같은 모든 자연수 중에서 소수를 찾아내는 방법
+
+방법 1
+- 1.의 방법2를 N개의 수에 대해서 적용한다면 시간복잡도 O(N*root(N))이 걸리게 된다.
+
+방법 2
+- 방법1보다 효율적인 방법은 에라토스테네스의 체를 이용하는 것이다.
+- 2부터 작은 소수들을 차례대로 배수들을 지워주는 것이다.
+- 시간복잡도는 O(N*log(logN))이다.
+
+/*
+// code
+
+int prime[100]; //소수를 저장해놓는 배열
+int pn=0;
+bool check[100]; // 소수가 아니면 true
+int n=100;
+
+for(int k=2;k<=n;k++){
+    if(check[k]==false){
+        prime[pn++]=k;
+
+        for(int i=k*k;i<=n;i+=k){ // k*k대신 k*2부터 하는 것이 좋다(arithmetic overflow)
+            check[i] = true;
+        }
+    }
+}
+*/
+
++ Additional Discussion
+
+- 소수 문제에서 등장하는 문제유형으로 골드바흐의 추측이 있다.
+
+- 골드바흐의 추측은 '2보다 큰 모든 짝수는 두 소수의 핣으로 표현이 가능하다.'
+- 이를 응용하면, '5보다 큰 모든 홀수는 세 소수의 합으로 표현이 가능하다.'
+- 10^18 이하의 소수에 대해서는 성립한다고 알려져있다.
+
+- 코드로 구현할 떼, 에라토스테네스의 체를 이용한다.
+- prime에서 소수를 a에 대입한 후, b= N-a가 소수인지 체크해주면 된다.

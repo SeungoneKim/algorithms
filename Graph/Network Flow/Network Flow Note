@@ -1,0 +1,257 @@
+<Network Flow Note>
+
+- 최대 유량은 그래프에서 한 정점에서 다른 정점까지 흐를 수 있는 최대의 양이다.
+- 즉, s에서 t로의 최대 유량은 s에서 t까지 최대한 흐를 수 있는 양을 말하는 것이다.
+
+- 간선의 가중치는 비용(cost) 또는 용량(capacity)의 의미가 있는데, 네트워크 플로우 문제에서는 용량을 말한다.
+- 비용은 어떠한 간선에서 이동이 이루어지면 가중치만큼이 더해지지만, 용량은 용량보다 적은 만큼이 이동할 수 있다.
+
+- 각 간선은 시작 정점, 끝나는 정점, 용량, 흐른 양 4가지 정보를 담고 있어야한다.
+
+- 시작점에서 나간 양, 끝점에서 들어온 양은 같으며 이 값이 최대 유량이다.
+- source(s), sink(t)라고 한다.
+- 사이에 다른 정점들은 들어온 유량과 나간 유량이 같아야한다.
+
+- 그래프에서 u->v 간선의 용량을 c(u,v), 흐른 양을 f(u,v)라고 하자.
+- 이 때, 다음과 같은 3가지 속성을 만족한다.
+1. Capacity Constraint : f(u,v) <= c(u,v)
+2. Skew Symmetry : f(u,v) == -f(v,u)
+3. Flow Conservation : sigma(f(u,v)) s.t. 'v connected to u' = 0 (키르히호프의 제 1법칙)
+
+- 문제에서는 최대용량, 실제유량을 저장하기 보다는 차이에 해당하는 잔여 용량(Residual Capacity)를 저장한다.
+- cf(u,v) = c(u,v)-f(u,v)
+- Residual Capacity는 흐르는 양을 표현한 것이 아니라 더 흐를 수 있는 정도와 방향을 나타낸 것이다.
+- Residual Graph에서 역방향에 숫자를 기록하는 것은 흐른 양을 기록하여, 마지막에 maximum flow를 구하기 위함이라고 이해한다.
+- "The Residual Graph isn't telling us where the flow is going, but rather telling us which edges are critical to look at to maximize the flow"
+
+- 문제에서 찾는 Augmenting Path를 찾기 위해서는 Residual Network를 이용하여서 cf(ui,ui+1)>0을 만족하는 u1,u2,...,uk를 찾는다.
+
+
+
+<Ford-Fulkerson Algorithm>
+- 최대 유량을 구하는 알고리즘이다.
+
+1. Augmenting Path를 DFS로 구한다.
+2. m= Augmenting Path 상에서의 최소값을 구한다.
+3. (ui,ui+1) 방향의 Residual Capacity에서 m을 뺀다. (c-(f+m)=cf-m)
+4. (ui+1,ui) 방향의 Residual Capacity에서 m을 더한다.(0-(-f-m)=cf+m)
+5. 위의 과정을 Augmenting Path를 못 구할 때까지 계속 한다.
+
+- Residual Capacity로 표현한 그래프에서는 source에 들어온 양, 또는 sink에서 나간 양이 최대 유량이 된다.
+
+- s->t 경로를 dfs로 계속 반복하는 알고리즘이므로, O(E)*O(최대유량f)=O(Ef)로, f의 값에 따라서 시간복잡도가 크게 바뀐다.
+- dfs가 O(최대유량f)번 반복된다.
+
+<Edmond-Karp Algorithm>
+- 최대 유량을 구하는 알고리즘이다.
+
+1. Augmenting Path를 BFS로 구한다.
+2. m= Augmenting Path 상에서의 최소값을 구한다.
+3. (ui,ui+1) 방향의 Residual Capacity에서 m을 뺀다. (c-(f+m)=cf-m)
+4. (ui+1,ui) 방향의 Residual Capacity에서 m을 더한다.(0-(-f-m)=cf+m)
+5. 위의 과정을 Augmenting Path를 못 구할 때까지 계속 한다.
+
+- s->t 경로를 bfs로 계속 반복하는 알고리즘이므로, O(E)*O(VE)=O(VE^2)이다.
+- 각 간선이 최솟값이 되는 횟수가 O(V)번 이므로 bfs가 O(VE)번 진행된다.
+
+/*
+//code
+
+//Ford-Fulkerson Algorithm
+struct MaximumFlow{
+    struct Edge{
+        int to;
+        int capacity;
+        Edge* rev;
+        Edge(int to,int capacity) : to(to), capacity(capacity)
+        {}
+    };
+
+    int n;
+    int source,sink;
+    vector<vector<Edge*>>graph;
+    vector<bool>check;
+    MaximumFlow(int n,int source,int sink): n(n),source(source), sink(sink)
+    {
+        graph.resize(n);
+        check.resize(n);
+    };
+
+    void add_edge(int u,int v,int cap){
+        Edge* ori = new Edge(v,cap);
+        Edge* rev = new Edge(u,0);
+        ori->rev = rev;
+        rev->rev = ori;
+        graph[u].push_back(ori);
+        graph[v].push_back(rev);
+    }
+    void add_edge_from_source(int v, int cap) {
+        add_edge(source, v, cap);
+    }
+    void add_edge_to_sink(int u, int cap) {
+        add_edge(u, sink, cap);
+    }
+    int dfs(int x,int c){
+        if(check[x]) return 0;
+        check[x]= true;
+        if(x==sink) return c;
+        
+        for(int i=0;i<graph[x].size();i++){
+            if(graph[x][i]->capacity>0){
+                int nc= graph[x][i]->capacity;
+                if(c!=0 && c<nc){
+                    nc=c;
+                }
+                int f= dfs(graph[x][i]->to, nc);
+                if(f){
+                    graph[x][i]->capacity -= f;
+                    graph[x][i]->rev->capacity += f;
+                    return f;
+                }
+            }
+        }
+        return 0;
+    }
+    int flow(){
+        int answ=0;
+        while(true){
+            fill(check.begin(),check.end(),false);
+            int f=dfs(source,0);
+            if(f==0) break;
+            answ+=f;
+        }
+        return answ;
+    }
+};
+
+int node(string s){
+    if(s[0]>='A' && s[0]<='Z'){
+        return s[0]-'A';
+    }
+    else{
+        return s[0]-'a'+26;
+    }
+}
+
+
+// Edmond-Karp Algorithm
+struct MaximumFlow {
+    struct Edge {
+        int from;
+        int to;
+        int capacity;
+        Edge *rev;
+        Edge(int from, int to, int capacity) : from(from), to(to), capacity(capacity) {
+        }
+    };
+    int n;
+    int source, sink;
+    vector<vector<Edge *>> graph;
+    vector<Edge *> edges;
+    vector<bool> check;
+    MaximumFlow(int n, int source, int sink) : n(n), source(source), sink(sink) {
+        graph.resize(n);
+        check.resize(n);
+    };
+    void add_edge(int u, int v, int cap) {
+        Edge *ori = new Edge(u,v,cap);
+        Edge *rev = new Edge(v,u,0);
+        ori->rev = rev;
+        rev->rev = ori;
+        graph[u].push_back(ori);
+        graph[v].push_back(rev);
+        edges.push_back(ori);
+    }
+    int bfs() {
+        fill(check.begin(), check.end(), false);
+        vector<pair<int,int>> from(n, make_pair(-1,-1));
+        queue<int> q;
+        q.push(source);
+        check[source] = true;
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+            for (int i=0; i<graph[x].size(); i++) {
+                if (graph[x][i]->capacity > 0 && !check[graph[x][i]->to]) {
+                    q.push(graph[x][i]->to);
+                    check[graph[x][i]->to] = true;
+                    from[graph[x][i]->to] = make_pair(x,i);
+                }
+            }
+        }
+        if (!check[sink]) {
+            return 0;
+        }
+        int x = sink;
+        int c = graph[from[x].first][from[x].second]->capacity;
+        while (from[x].first != -1) {
+            if (c > graph[from[x].first][from[x].second]->capacity) {
+                c = graph[from[x].first][from[x].second]->capacity;
+            }
+            x = from[x].first;
+        }
+        x = sink;
+        while (from[x].first != -1) {
+            Edge *e = graph[from[x].first][from[x].second];
+            e->capacity -= c;
+            e->rev->capacity += c;
+            x = from[x].first;
+        }
+        return c;
+    }
+    int flow() {
+        int ans = 0;
+        while (true) {
+            int f = bfs();
+            if (f == 0) break;
+            ans += f;
+        }
+        return ans;
+    }
+    bool dfs(int x, int goal) {
+        if (x == goal) {
+            return true;
+        }
+        check[x] = true;
+        for (int i=0; i<graph[x].size(); i++) {
+            int next = graph[x][i]->to;
+            if (!check[next] && graph[x][i]->capacity > 0) {
+                if (dfs(next, goal)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    int crucial() {
+        flow();
+        int ans = 0;
+        for (auto e : edges) {
+            fill(check.begin(), check.end(), false);
+            if (!dfs(e->from, e->to)) {
+                ans += 1;
+            }
+        }
+        return ans;
+    }
+};
+int node(string s) {
+    if (s[0] >= 'A' && s[0] <= 'Z') {
+        return s[0] - 'A';
+    } else {
+        return s[0] - 'a' + 26;
+    }
+}
+
+- 자주 쓰이는 기법들 
+1. 
+- 플러드 필 알고리즘이 사용되는 2차원 배열에서 각 정점에도 가중치의 의미가 부여되야한다면, 각 정점을 둘로 쪼개야한다.
+- 간선이 들어오는 부분과 나가는 부분 둘로 나눈뒤에, 그 사이에 용량이 1인 간선을 둔다.
+- 만약 둘로 나뉜 정점 사이의 간선이 끊기게 된다면 그 노드가 막힌다는 의미가 있다.
+
+2.
+- 플러드필 알고리즘이 적용될 수 있는 2차원 배열을 이분그래프로 표현하는 방법중 하나는 행을 왼쪽 그룹, 열을 오른쪽 그룹으로 하는 것이다.
+- r행 c열에 유의미한 정보가 있으면 행 그룹에서 r번째 노드와 열 그룹에서 c번째 노드를 용량이 1인 간선으로 연결하는 것이다.
+
+3.
+- 서로 리그형식으로 대결을 해서 승,무승부,패 여부에 따라서 점수를 다르게 배분하는 문제에서는 각 대결을 왼쪽 열에, 각 사람을 오른쪽 열에 배치하여서 이분그래프를 만든다.

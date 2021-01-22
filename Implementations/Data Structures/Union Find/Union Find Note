@@ -1,0 +1,42 @@
+<Union Find Note>
+- 상호 배타적 집합(Disjoint Set)이라고 한다.
+
+- 2가지 연산으로 이루어져 있다.
+1. Find : x가 어떤 집합에 포함되어 있는지 찾는 연산
+2. Union : x와 y가 서로 포함되어 있는 집합을 합치는 연산
+
+- 구현은 트리를 이용한다.
+- parent[i]에 i의 parent를 저장한다.
+
+/*
+//code
+
+// Implementing Find function using Path Compression
+int Find(int x){
+    if(x==parent[x]){
+        return x;
+    }
+    else{
+        int y= Find(parent[x]);
+        parent[x]=y;
+        return y;
+    }
+}
+
+// Implementing Union function using Rank
+void Union(int x, int y){
+    x= Find(x);
+    y= Find(y);
+    if(x==y){
+        return;
+    }
+    if(rank[x]<rank[y]) swap(x,y);
+    parent[y]=x;
+    if(rank[x]==rank[y]){
+        rank[x] = rank[y]+1;
+    }
+}
+
+*/
+
+- 경로 압축과 랭크를 이용한 유니온을 사용하면 연산의 시간 복잡도는 O(a(N))이다.

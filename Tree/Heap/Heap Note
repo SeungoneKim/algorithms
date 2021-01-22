@@ -1,0 +1,17 @@
+<Heap Note>
+- Heap은 부모노드와 자식노드의 대소관계가 정해진 완전이진트리이다.
+
+- 최대힙은 부모노드가 자식노드에 들어있는 값보다 크다.
+- 최소힙은 부모노드가 자식노드에 들어있는 값보다 작다.
+
+- 힙에서 할 수 있는 연산은 3가지있다.
+1. Adding a number
+2. Removing the Root Node(Max in a MaxHeap)
+3. Looking at the Root Node(finding the max in a MaxHeap)
+
+- 수를 추가할 때는 가장 밑에 노드를 추가한후, 위로 올라가면서 swap해주면 된다.
+- 최대값을 제거할 때는 루트를 가장 마지막에 있는 값과 swap한 후, 밑으로 내려가면서 swap해주면 된다.
+
+- C++에서는 priority_queue를 이용하면된다.
+- 최소힙을 이용할 때는 -1을 곱하여서 힙에 넣은 후, 힙에서 빼서 사용할 때 다시 -1을 곱해주면 된다.
+- priority_queue<int, vector<int>, greater<int>>pq 를 이용해주어도 된다.

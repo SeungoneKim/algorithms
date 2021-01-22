@@ -1,0 +1,18 @@
+<Modular Arithmetic Note>
+
+- 답을 출력해야하는데, 지나치게 커서 int나 long long을 넘어서는 경우가 있다.
+(특히 Dynamic Programming 할때)
+
+- 이때, 10007이나 100000007로 나눈 나머지를 출력하라는 꼴로 문제가 주어지게 된다.
+
+/*
+// code
+
+-(a+b) mod m = ((a mod m)+(b mod m)) mod m
+-(a*b) mod m = ((a mod m)*(b mod m)) mod m
+-(a-b) mod m = ((a mod m)-(b mod m)+m) mod m
+*/
+
+- 뺄셈의 경우는 나머지가 음수일 수 있기 때문에 마지막에 m을 더해주어야 한다
+
+- /의 경우는 분배법칙이 성립하지 않아서, 역원을 찾아야한다.

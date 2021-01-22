@@ -1,0 +1,69 @@
+<Biparative Graph Matching Note>
+
+- Matching은 그래프 G에서 적절히 간선을 선택했을 때, 각각의 간선이 공통의 vertex를 공유하지 않는 것을 말한다.
+- Maximum Matching은 matching을 만족하는 Edge의 최대값을 의미한다.
+- 일반적인 matching은 NP문제이므로 풀 수 없다.
+
+- 이분매칭은 네트워크플로우를 이용해서 풀 수 있다.
+- 이분 매칭으로 연결시키는 상황은 사람 A~E를 일 1~5로 연결짓는 상황으로 생각하자.
+
+- 네트워크 플로우 문제로 바꾸어서 해결할 수 있다.
+- 각 사람과 일이 두 열로 따로 나열되어 있는 상황을 생각하자.
+- 사람 열 왼쪽에 source노드를, 일 열 오른쪽에 sink노드를 두어서 그래프를 표현한다.
+- 사람 열 왼쪽에 source노드와 모든 사람을 연결하는 간선의 capacity를 1로 둔다.
+- 일 열 오른쪽에 sink노드와 모든 일을 연결하는 간선의 capacity를 1로 둔다.
+
+- 이렇게 해결하면 시간초과가 걸릴 수 있다.
+- source노드와 사람 열들을 연결한 간선들은 가중치가 항상 1 또는 0이기 때문에 edge를 만들기 보다는 dfs를 사람들마다 호출하는 것이 더 좋다.
+- 일 열들과 sink노드들을 연결한 간선들은 일 열들이 항상 sink노드나 다시 사람 열의 노드를 가리키기 때문에 대신 pred라는 배열로 기록한다.
+- pred 배열은 -1이면 sink 노드를 가리키는 것이고, 숫자라면 사람 열의 노드를 가리키는 것이다.
+
+/*
+// code
+
+struct MaximumFlow{
+    int n;
+    int source,sink;
+    vector<vector<int>>graph;
+    vector<bool>check;
+    vector<int>pred;
+    MaximumFlow(int n): n(n)
+    {
+        graph.resize(n);
+        check.resize(n);
+        pred.resize(n,-1); 
+    };
+
+    void add_edge(int u,int v){
+        graph[u].push_back(v);
+    }
+    bool dfs(int x){
+        if(x==-1) return true;
+        
+        for(int next : graph[x]){
+            if(check[next]) continue;
+            check[next]=true;
+            if(dfs(pred[next])){ // since pred[next]==-1 at initialization, it will return true if going to sink
+                pred[next]=x;
+                return true;
+            }
+        }
+        return false;
+    }
+    int flow(){
+        int answ=0;
+        for(int i=0;i<n;i++){
+            fill(check.begin(),check.end(),false);
+            if(dfs(i)){
+                answ+=1;
+            }
+        }
+        return answ;
+    }
+};
+
+*/
+
+- 각 사람들이 2번 일을 할 수 있다면, 사람 열의 모든 노드들에 대해서 dfs를 2번 호출하면 된다.
+- 사람들중에서 k명만 2번 일을 할 수 있다면, 소스노드와 연결된 새로운 노드를 하나 추가하고, 용량이 k인 간선과 연결한 후, 이 노드를 모든 사람 노드들과 용량이 1인 간선으로 연결한다.
+

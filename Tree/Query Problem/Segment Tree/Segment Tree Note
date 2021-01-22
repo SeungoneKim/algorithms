@@ -1,0 +1,429 @@
+<Segment Tree Note>
+
+- 세그먼트트리는 RMQ 문제를 풀기 위한 자료구조이다.
+
+- RMQ는 구간의 최소값, 최대값을 구하는 문제이다.
+- 어떠한 특정한 구간에서 최소, 최대를 찾는 문제는 총 Q개 주어진다.
+
+- 만약 문제가 1개이면, '다해보기'방법으로 접근할 수 있다.
+- 이 방법은 시간복잡도가 O(N)이다.
+/*
+//code
+
+int m=a[i];
+for(int k=i+1;k<=j;k++){
+    if(m>a[k]){
+        m=a[k];
+    }
+}
+*/
+
+- 문제가 Q개이면, 시간복잡도가 O(QN)이므로 더 좋은 방법이 필요하다.
+
+===========================================================================
+<방법1> 루트 N으로 나누기 (sqrt decomposition)
+
+- N개의 수를 root(N)개의 그룹으로 나누는것이 핵심적인 아이디어이다.
+- 각 그룹에는 수가 root(N)개 들어있다.
+
+- 각 그룹을 나누어 group[]배열을 채우는데 시간복잡도가 O(N)이다.
+-> 쿼리를 수행하기 전에 데이터를 선처리하는 과정이라 부른다.
+
+/*
+//code
+
+// group[i] = i번 그룹의 최소값을 저장하는 배열
+for(int i=0;i<n;i++){
+    if(i%r==0){
+        group[i/r] = a[i];
+    }
+    else{
+        group[i/r] = min(group[i/r],a[i]);
+    }
+}
+
+*/
+
+- (i,j)에서의 최소값을 찾을 때, i와 j가 같은 그룹에 있을 때는, i부터 j까지 선형적으로 탐색하면 된다.
+- 이 과정의 시간복잡도는 O(root(N))이다.
+
+- (i,j)에서의 최소값을 찾을 때, i와 j가 다른 그룹에 있을 때는, i가 속한 그룹, j가 속한 그룹, 그 사이 그룹들로 구분해서 탐색해야 한다.
+- i가 속한 그룹에서 최소, j가 속한 그룹에서 최소는 선형적으로 탐색하고, 사이 그룹에 대해서는 group[]를 사용해서 최소값을 탐색해야 한다.
+- 이 과정의 시간복잡도는 O(root(N))이다.
+
+/*
+//code
+
+while(true){
+    answ= min(answ,a[start]);
+    start +=1;
+    if(start%r==0){
+        break;
+    }
+}
+while(true){
+    answ=min(answ,a[end]);
+    end-=1;
+    if(end&r==0){
+        break;
+    }
+}
+for(int i=start/r;i<=end/r;i++){
+    answ= min(answ,group[i]);
+}
+
+*/
+
+
+- 최종적으로 시간복잡도는 O(N+Q*root(N))이다.
+===========================================================================
+<방법2> Dynamic Programming
+
+- LCA 알고리즘에서 p[][]배열을 채우는 방법과 매우 유사하다.
+- p[i][j]는 a[i]부터 2**j개의 최소값을 의미한다.
+
+- 핵심은 a[i]부터 2**j개의 최소값은 a[i]부터 2**(j-1)개의 최소값과 a[i+2**(j-1)]개의 최소값과 같다는 것이다.
+- 따라서, d[i][j] = min(d[i][j-1],d[i+(1<<j-1)][j-1])이 성립한다.
+
+- 이 방법은 O(NlgN)이라는 선처리시간이 필요하다.
+
+/*
+// code
+
+for(int i=0;i<n;i++){
+    d[i][0]=a[i];
+}
+for(int j=1;j<17;j++){
+    for(int i=0;i<n;i++){
+        if(i+(1<<j)-1<n){
+            p[i][j]= min(p[i][j-1],p[i+(1<<(j-1))][j-1]);
+        }
+        else{
+            break;
+        }
+    }
+}
+
+*/
+
+
+- (i,j)까지의 구간에서 최소값을 찾을 때는 p[][]배열을 잘 나누어서 비교하면 된다.
+ex) 1~6 = p[1][2]와 p[5][1] 비교
+
+- 이 방법은 쿼리당 O(lgN)이므로, Q개의 쿼리에 대해 O(QlgN)만큼의 시간이 걸린다.
+/*
+// code
+int answ= a[start];
+int k=16;
+
+while(start<=end && k>=0){
+    if(start+(1<<k)-1 <= end){
+        answ= min(answ,p[start][k]);
+        start += (1<<k);
+    }
+    k--;
+}
+
+- 최종적인 시간복잡도는 O(NlgN + QlgN)이다.
+
+===========================================================================
+<방법3> 세그먼트 트리
+
+- 구간의 최대, 최소값을 구할 때 방법1, 방법2보다 효율적인 방법이다.
+
+- 세그먼트 트리는 항상 자식노드를 2개 혹은 0개 갖고 있는 이진트리이다.
+
+- 트리의 모든 노드가 구간을 담당하고 있다.
+- 루트 노드는 [start,end]를, 그 밑에 자식 노드는 [start,m], [m+1,end]인 식이다.
+- 리프 노드는 0,1,2... 와 같이 구간의 크기가 1인 경우이다.
+
+- 배열에서 2*x에 왼쪽 자식 노드를, 2*x+1에 오른쪽 자식 노드를 저장하는 방식으로 구현할 수 있다.
+
+- 세그먼트 트리를 만들기 위한 선처리 시간은 O(NlgN)이다.
+
+/*
+// code
+void init(vector<int>&tree,vector<int>&a,int node, int start, int end){
+    if(start==end){
+        tree[node]=a[start];
+    }
+    else{
+        init(tree, a, node*2, start, (start+end)/2);
+        init(tree, a, node*2+1, (start+end)/2+1, end);
+        tree[node]= min(tree[node*2],tree[node*2+1]);
+    }
+}
+
+*/
+
+- 각 쿼리에 대해서 처리하는데 걸리는 시간은 O(lgN)이다.
+- Q개의 쿼리에 대해서 걸리는 시간은 O(QlgN)이다.
+
+/*
+// code
+int query(vector<int>&tree, int node, int start, int end, int i, int j){
+    if(i>end || j<start) return -1;
+    if(i<=start && end<=j) return tree[node];
+    int m1=query(tree,2*node,start,(start+end)/2,i,j);
+    int m2=query(tree,2*node+1,(start+end)/2+1,end,i,j);
+    if(m1==-1){
+        return m2;
+    }
+    else if(m2==-1){
+        return m1;
+    }
+    else{
+        return min(m1,m2);
+    }
+}
+
+*/
+
+- 구간의 최대, 최소값을 찾기 위한 최종적인 시간복잡도는 O(NlgN + QlgN)이다.
+
+
+- 값을 변경할 때도 O(lgN)의 시간복잡도가 걸린다.
+
+/*
+//code
+
+void update(vector<int>&tree, int node, int start, int end, int index, int value){
+    if(index<start || end<index) return;
+    if(start==end){
+        tree[node]=value;
+        return;
+    }
+    update(tree,node*2,start,(start+end)/2,index,value);
+    update(tree,node*2+1,(start+end)/2+1,end,index,value);
+    tree[node]=min(tree[node*2],tree[node*2+1]);
+}
+*/
+
+
+- 구간의 최대, 최소를 찾고 변경하는 연산 외에도 구간의 합을 찾고 변경하는 연산도 세그먼트 트리를 이용해서 편하게 할 수 있다.
+- 이 코드는 연습용이므로 실전에서는 구간합과 관련된 쿼리는 무조건 펜윅트리로 처리하도록 한다.
+/*
+// code
+
+long long init(vector<long long>& a, vector<long long>& tree, int node, int start, int end) {
+    if (start == end) {
+        tree[node] = a[start];
+    } else {
+        tree[node] = init(a, tree, node*2, start, (start+end)/2) + init(a, tree, node*2+1, (start+end)/2+1, end);
+    }
+    return tree[node];
+}
+void update(vector<long long>& tree, int node, int start, int end, int i, long long diff) {
+    if (i < start || i > end) return;
+    tree[node] = tree[node] + diff;
+    if (start != end) {
+        update(tree, node*2, start, (start+end)/2, i, diff);
+        update(tree, node*2+1, (start+end)/2+1, end, i, diff);
+    }
+}
+long long sum(vector<long long>& tree, int node, int start, int end, int i, int j) {
+    if (i > end || j < start) {
+        return 0;
+    }
+    if (i <= start && end <= j) {
+        return tree[node];
+    }
+    return sum(tree, node*2, start, (start+end)/2, i, j) + sum(tree, node*2+1, (start+end)/2+1, end, i, j);
+}
+
+int query(vector<int>&tree, int node, int start, int end, int i, int j){
+    if(i>end || j<start) return -1;
+    if(i<=start && end<=j) return tree[node];
+    int m1=query(tree,2*node,start,(start+end)/2,i,j);
+    int m2=query(tree,2*node+1,(start+end)/2+1,end,i,j);
+    if(m1==-1){
+        return m2;
+    }
+    else if(m2==-1){
+        return m1;
+    }
+    else{
+        return min(m1,m2);
+    }
+}
+
+*/
+
+- 정리하면, 구간의 최소, 최대, 합 등 구간과 관련된 연산(찾기,변경)을 할 때 세그먼트 트리는 매우 효율적인 자료구조이다.
+===========================================================================
+< Segment Tree in LCA Algorithm >
+
+
+- 세그먼트 트리를 이용하면 LCA를 구하는 문제도 해결할 수 있다.
+
+- 프리오더하는 순회를 쭉 기록하면 노드가 N개인 트리에 대해서 1+2*(N-1)번 정점을 방문한다.
+
+
+- 루트에서 dfs를 통해서 프로오더의 순회하면서 방문한 정점, 중간 정점, 깊이를 기록한다.
+- 각 정점을 처음 방문한 순서도 기록한다.
+
+- LCA(u,v)는 u와 v가 첫 등장한 인덱스 사이에서 깊이가 가장 최소인 정점이다.
+
+- 세그먼트 트리에 구간의 최소값의 인덱스를 넣는다.
+
+/*
+// code
+
+depth[]
+first_visit_index[]
+dfs_order[]
+
+void init(vector<int>&tree,int node, int start, int end){
+    if(start==end){
+        tree[node]=start;
+    }
+    else{
+        init(tree, a, node*2, start, (start+end)/2);
+        init(tree, a, node*2+1, (start+end)/2+1, end);
+        if(level[tree[node*2]]<level[tree[node*2+1]]){
+            tree[node] = tree[node*2];
+        }
+        else{
+            tree[node] = tree[node*2+1];
+        }
+    }
+}
+
+int query(vector<int>&tree, int node, int start, int end, int i, int j){
+    if(i>end || j<start) return -1;
+    if(i<=start && end<=j) return tree[node];
+    int m1=query(tree,2*node,start,(start+end)/2,i,j);
+    int m2=query(tree,2*node+1,(start+end)/2+1,end,i,j);
+    if(m1==-1){
+        return m2;
+    }
+    else if(m2==-1){
+        return m1;
+    }
+    else{
+        if(level[m1]<level[m2]){
+            return m1;
+        }
+        else{
+            return m2;
+        }
+    }
+}
+
+*/
+===========================================================================
+
+< 세그먼트 트리의 배재귀적 구현>
+
+- N을 가장 가까운 2**k의 꼴로 나타내어 Full Binary Tree가 되도록 한다.
+-> 모든 리프노드의 깊이를 같게하는 것이다.
+
+- N을 크게하고, 뒤쪽 부분은 제외하도록 코드를 구현하면 배재귀로 구현하는 것이 가능하다.
+
+- 구간합을 구할 때,
+1. start가
+1) 왼쪽자식이면 올라간다.
+2) 오른쪽자식이면 답을 더하고, 오른쪽 칸으로 이동한다.
+
+2. end가
+1) 오른쪽자식이면 올라간다.
+2) 왼쪽자식이면 답을 더하고, 왼쪽 칸으로 이동한다.
+
+/*
+// code
+
+void update(int x, long long diff){
+    tree[x] += diff;
+    while(x>1){
+        tree[x/2] += diff;
+        x/=2;
+    }
+}
+
+long long sum(int l, int r){
+    
+    long long answ=0;
+    while(l<r){
+        if(l%2 ==0){
+            l /=2;
+        }
+        else{
+            answ += tree[l];
+            l += 1;
+            l /= 2;
+        }
+        if(r%2 == 1){
+            r /=2;
+        }
+        else{
+            answ += tree[r];
+            r--;
+            r /= 2;
+        }
+    }
+    if(l==r){
+        answ += tree[l];
+    }
+    return answ;
+}
+
+*/
+===========================================================================
+
+- 구간의 곱을 이용할 때는 다음 코드를 이용한다.
+/*
+void init(vector<int> &tree, vector<int> &a, int node, int start, int end) {
+    if (start == end) {
+        tree[node] = a[start];
+        return;
+    }
+    init(tree, a, node*2, start, (start+end)/2);
+    init(tree, a, node*2+1, (start+end)/2+1, end);
+    tree[node] = tree[node*2] * tree[node*2+1];
+}
+int sign(vector<int> &tree, int node, int start, int end, int left, int right) {
+    if (left > end || right < start) {
+        return 1;
+    }
+    if (left <= start && end <= right) {
+        return tree[node];
+    }
+    return sign(tree, node*2, start, (start+end)/2, left, right) * sign(tree, node*2+1, (start+end)/2+1, end, left, right);
+}
+void update(vector<int> &tree, int node, int start, int end, int i, int value) {
+    if (i > end || i < start) {
+        return;
+    }
+    if (start == end) {
+        tree[node] = value;
+        return;
+    }
+    update(tree, node*2, start, (start+end)/2, i, value);
+    update(tree, node*2+1, (start+end)/2+1, end, i, value);
+    tree[node] = tree[node*2] * tree[node*2+1];
+}
+*/
+===========================================================================
+
+- 세그먼트 트리를 이용하여서 k번째 원소를 찾을 수 있다.
+
+/*
+// code
+
+vector<int> a(MAX+1);
+int h = (int)ceil(log2(MAX+1));
+int tree_size = (1 << (h+1));
+vector<int> tree(tree_size);
+
+int kth(vector<int> &tree, int node, int start, int end, int k) {
+    if (start == end) {
+        return start;
+    } else {
+        if (k <= tree[node*2]) {
+            return kth(tree, node*2, start, (start+end)/2, k);
+        } else {
+            return kth(tree, node*2+1, (start+end)/2+1, end, k-tree[node*2]);
+        }
+    }
+}
+*/

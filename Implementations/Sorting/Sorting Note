@@ -1,0 +1,71 @@
+<Sorting Note>
+
+- 리스트에 담겨있는 자료를 어떠한 순서로 나열하는 것
+
+- 선택 정렬, 버블 정렬, 삽입 정렬, 퀵 정렬, 힙 정렬, 병합 정렬...
+- 정렬은 O(NlgN)이 걸리는 정렬을 사용해야한다.
+ex) 퀵 정렬, 힙 정렬, 병합 정렬
+
+/*
+//code
+#include <algorithm>
+
+int arr[100];
+sort(a,a+100);
+
+vector<int>v;
+sort(v.begin(),v.end());
+*/
+
+- sort(first, last)는 [first,last)을 오름차순으로 정렬한다.
+
+- pair을 사용하면 less<int>을 3번째 인자로 주면 내림차순으로 정렬된다.
+- 구조체를 사용하면 sort에 3번째 인자로 비교하는 함수를 전달해줘야한다.
+
+- cmp함수에서 뒤 인자가 더 크면 오름차순으로 정렬된다.
+
+/*
+//code
+
+bool cmp(const Point&u, const Point&v){
+    if(u.x<v.x){
+        return true;
+    }
+    else if(u.x==v.x){
+        return u.y < v.y
+    } else{
+        return false;
+    }
+}
+
+*/
+
+- 같은 것이 있는 경우에 정렬하기 전의 순서가 유지되는 정렬 알고리즘을 Stable Sorting 알고리즘이라 한다.
+ex) Merge Sorting : stable_sort
+
+
+
+/*
+// priority queue sorting 
+
+struct Custom{
+
+	int x;
+	int y;
+	int value;
+	Custom(int value) : x(0), y(0), value(value) {
+    }
+
+};
+
+
+// 오름차순 정렬
+struct cmp{
+    bool operator()(Custom t, Custom u){
+        return t.value > u.value;
+    }
+};
+
+priority_queue< Custom, vector<Custom>,  cmp > pq;
+
+*/

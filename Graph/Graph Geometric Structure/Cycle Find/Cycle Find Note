@@ -1,0 +1,35 @@
+<Cycle Find Note>
+
+- dfs를 하는도중에 이미 방문한 점이, 직전점이 아니면 사이클을 찾았다고 할 수 있다.
+
+/*
+//DFS code implemented by adjacentlist (regarding cycle)
+
+int check[10001]; // 이번 탐색 사이클에서 몇번째로 방문했는지 기록
+int which_search[10001]; // 몇번째 탐색 사이클에서 방문했는지 기록
+
+void dfs(int cur,int cnt, int which){
+    if(!check[cur]){
+        if(which_search[cur]!=which){
+            return 0;
+        }
+        else{
+            //해야하는 일
+        }
+    }
+    check[cur]=cnt;
+    which_search[cur]=which;
+
+    dfs(next,cnt+1,which);
+}
+
+*/
+
+-dfs의 처음에 if문 조건을 넣을지 말지는 문제의 상황을 보고 결정하면 된다.
+-dfs의 인자로 pastc,pastr를 전해주면 편하게 풀 수 있다.
+
+-사이클을 찾는 문제의 유형은 다음과 같다.
+1. 사이클을 이루는지 여부를 찾는 문제
+2. 사이클을 이루는 구성원의 수를 찾는 문제
+3. 사이클의 개수를 찾는 문제
+4. 사이클로부터 거리를 구하는 문제

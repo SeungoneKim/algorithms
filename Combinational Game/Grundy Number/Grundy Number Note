@@ -1,0 +1,21 @@
+<Grundy Number Note>
+
+==========The Sprague-Grundy Function==========
+
+- g(x)=min(n>=0, n!=g(y) for y in F(x))
+- g(x)는 x의 다음 위치 y의 g(y)에 포함되지 않는 가장 작은 정수
+
+- 각각의 위치에 대해서 g(x)를 찾는 것이다.
+
+- Sprague-Grundy Function을 적용시켜보면 주기성을 찾을 수 있다.
+- N의 값이 너무 큰 경우에는 주기를 직접 찾아서 xor를 계산한다.
+
+- 게임이 여러개로 구성된 경우에는 Sprague-Grundy Function 값을 xor한 값이 Sprague-Grundy Function의 값이다.(님게임)
+
+- xor한 값이 0이면 p위치(l위치)이고, 0이 아니면 n위치(w위치)이다.
+
+
+
+
+- N이 너무 큰 경우 모든 경우의 Grundy Number를 구하지 못할 수 있댜.
+- 이 또한 구해보고 규칙성을 찾는 방법밖에 없다.

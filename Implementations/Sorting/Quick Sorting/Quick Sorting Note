@@ -1,0 +1,42 @@
+<Quick Sorting Note>
+
+- 평균적인 상황에서 최고의 성능을 자랑하는 알고리즘이다.
+- 평균적으로는 O(NlgN)의 시간복잡도가 걸리지만, 최악의 경우에는 O(N^2)의 시간복잡도가 걸린다.
+
+- 피벗을 하나 고른 후, 그것보다 작은 것을 앞으로, 큰 것을 뒤로 보내는 방법으로 구현한다.
+- 그 다음, 피벗의 앞과 뒤에서 퀵 정렬을 수행하면 된다.
+
+- 항상 절반으로 나누는 머지소트와 달리, 퀵 소트는 피벗을 기준으로 작은 것들이 앞에, 크거나 같은 것들이 뒤로 가게 된다.
+
+int choosePivot(int low, int high){
+    return low+(high-low)/2;
+}
+
+int partition(int low, int high){
+    int pivotIndex =  choosePivot(low, high);
+    int pivotValue = a[pivotIndex];
+    swap(a[pivotIndex,a[high]);
+    int storeIndex = low;
+    for(int i=low;i<high;i++){
+        if(a[i]<pivotValue){
+            swap(a[i],a[storeIndex]);
+            storeIndex++;
+        }
+    }
+    swap(a[storeIndex],a[high]);
+    return storeIndex;
+}
+
+void quicksort(int low, int high){
+    if(low<high){
+        int pivot = partition(low, high);
+        quicksort(low,pivot-1);
+        quicksort(pivot+1,high);
+    }
+}
+
+- 적절한 피벗을 잘 선택하는 것이 중요하다.
+
+- 퀵 소트를 응용하면 정렬되지 않은 리스트에서 k번째 작은 수를 찾는 퀵 셀렉트를 할 수 있다.
+- 퀵 소트와 달리 한 쪽만 호출하면 된다.
+- 시간복잡도는 O(N)이지만, 최악의 경우에는 O(N^2)이다.

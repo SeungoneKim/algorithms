@@ -1,0 +1,6 @@
+<Max, Min of Trials Note>
+
+-재귀를 설계할 때 가능한 설계 방법론.
+1. 어떤 일이 일어난 횟수를 세라고 하면, 종료조건에 return 0을 한 후, 
+하위 재귀에서 상위 재귀로 돌려줄 때, 조건을 만족한다면, 1씩 더해서 돌려주면 된다. 
+answ=-1; temp=go(); if(answ==-1 || answ<temp+1){ answ=temp+1};

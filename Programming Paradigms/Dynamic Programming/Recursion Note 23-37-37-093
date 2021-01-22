@@ -1,0 +1,88 @@
+<Recursion Note>
+
+- 1~N이 채워질때 그 안에서 일정한 순서나 패턴으로 i번째가 채워지지 않고, 지그재그라던지 무작위의 순서라면 재귀를 설계한다.
+- 재귀함수는 다음 상태의 재귀함수를 호출하기 때문에 무작위 패턴을 다루기에 더 용이하기 때문이다.
+
+1유형) 방법의 수 : 만족시키면 1리턴, 만족하지 않으면 0리턴
+-> 맨 밑 노드에서 시작해서 맨 위 층의 노드 중에서 조건을 만족하는 노드까지 가는 길의 개수를 찾는것이라 생각하자.
+long long go(int len,int totalsum){
+    
+    if(len==n-1 && totalsum==goal){
+        return 1;
+    }
+    else if(len==n-1) return 0;
+    long long& answ= dp[len][totalsum];
+    if(answ!=-1) return answ;
+
+    answ=0;
+    if(totalsum+a[len+1]<=20)
+        answ+= go(len+1,totalsum+a[len+1]);
+    if(totalsum-a[len+1]>=0)
+        answ+= go(len+1,totalsum-a[len+1]);
+
+    return answ;
+}
+
+ex) BJ 5557
+
+2유형) 최대,최소의 수 : 만족시키면 1리턴(or 0리턴), 만족하지 않으면 -inf리턴
+-> 맨 밑 노드에서 시작해서 조건을 만족하는 노드를 가는 길 중에서 길의 길이가 최소,최대인 길의 길이를 찾는 것이라 생각하자.
+
+int go(int state,int target){
+    if(target==rownum*colnum){
+        if(state==0)return 0;
+        else return -infinity;
+    }
+    if(target>rownum*colnum){
+        return -infinity;
+    }
+
+    int& answ=dp[state][target];
+    if(answ!=-1) return answ;
+
+    int col= target/rownum;
+    int row= target%rownum;
+
+    // we first check if the target is filled by matrix
+    if(matrix[row][col]=='1'){
+        return answ = go(state>>1,target+1)+1;
+    }
+    // case of not putting any block.
+    answ = go(state>>1,target+1);
+
+    // we next check if the target was already filled by blocks.
+    if((state&1)==0){    
+        // we consider putting 1*1 on the target
+        answ = max(answ,go(state>>1,target+1)+1);
+
+        // we next consider putting 2*2 on the target
+        if(row!=rownum-1 && col!=colnum-1){
+            if( ((state&1)==0) && ((state&2)==0) && matrix[row][col]!='1' && matrix[row+1][col]!='1' && matrix[row][col+1]!='1' && matrix[row+1][col+1]!='1'){
+                answ = max(answ,go((state>>2) | (1<<(rownum-1)) | (1<<(rownum-2)), target+2)+16);
+            }
+        }
+        
+    }
+    return answ;
+}
+
+ex) BJ 14389
+
+3유형) 외부값의 최대,최소 : 만족시키면 마지막 노드(마지막 가중치) 리턴, 만족하지 않으면 0 리턴 
+-> 나무가지가 현재 노드에서 다음 노드로 갈때의 외부값 가중치를 의미, 맨 위 층의 노드 중에서 조건을 만족하는 노드까지 길의 가중치 누적합을 찾는것이라 생각하자.
+-> 초기상태를 호출, [현 상태] = (다음 상태) + 정보, 종결조건에서 0리턴, 초기호출함수는 모든 합을 가지고 종료된다.
+(위로 뻗은 나무가 있다면, 가장 밑에서 모든 위에 있는 나무가지들의 무게합을 갖고 있다고 생각하자)
+
+int go(int row,int col){
+    if(row==rownum && col==colnum) return matrix[row][col];
+    if(row>rownum || col>colnum) return 0;
+    int& answ= dp[row][col];
+    if(answ>=0) return answ;
+    answ=0;
+
+    answ= max(go(row+1,col),go(row,col+1))+matrix[row][col];
+
+    return answ;
+}
+
+ex) BJ 11048, BJ 2281

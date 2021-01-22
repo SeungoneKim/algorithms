@@ -1,0 +1,38 @@
+<GCD & LCM Note>
+
+방법 1
+- 최대 공약수를 구하는 가장 쉬운 방법은 2부터 min(a,b)의 모든 정수에 대해서 a와 b를 나누어 보는 것이다.
+- 이 방법은 구하는데 O(N)의 시간 복잡도가 필요하다.
+
+방법 2
+- 유클리드 호제법을 이용하면 더 빠르게 구할 수 있다.
+- a%b=r일떼, GCD(a,b) = GCD(b,r)인 것과 같다는 것이다.
+
+/*
+// code
+
+// using recursive function
+int gcd(int s, int b){
+    if(s==0) return b;
+
+    int k =s;
+    s= b%s;
+    b=k;
+
+    return gcd(s,b);
+}
+
+// not using recursive function
+int gcd(int s,int b){
+    while(s!=0){
+        int r = b%s;
+        b=s;
+        s=r;
+    }
+    return b;
+}
+
+*/
+
+- 최소공배수를 구할 때는, LCM = A*B/GCD를 통해서 구할 수 있다.
+- arithmetic overflow를 고려하여, (A/GCD)*(B/GCD)*GCD로 계산해야 한다.

@@ -1,0 +1,107 @@
+<SCC Note>
+
+- 강한 연결요소(SCC)는 방향그래프에서 내부의 모든 정점에서 내부의 다른 모든 정점으로 갈 수 있는 최대 그룹이다.
+- 정확히 말하면 다음 두가지 조건을 만족해야 강한 연결요소라고 할 수 있다.
+1. SCC내의 임의의 두 정점 u,v 사이에 u->v경로와 v->u 경로가 항상 존재한다.
+2. SCC 내의 임의의 정점 u와 외부의 임의의 정점 v 사이에 u->v경로와 v->u 경로가 동시에 존재하는 경우는 없다.
+- 즉, 방향그래프는 한개 이상의 SCC들로 분리될 수 있다.
+
+
+- 강한 연결요소를 구하는 알고리즘에는 Kosaraju's Algorithm과 Tarjan's Algorithm이 존재한다.
+
+=========================================================================================
+<Kosaraju's Algorithm>
+- 코사라주 알고리즘은 역방향 그래프가 원래 그래프와 정확히 같은 강한 연결 요소를 갖는 사실을 이용한 알고리즘이다.
+
+1. DFS tree를 만들어서 tin,tout을 기록한다. (이는 LCA알고리즘에서 만드는 tin,tout과 완전히 동일하다)
+2. 그래프 G에서 모든 간선의 방향을 반대로 바꾼 역방향 그래프 T를 만든다.
+3. tout 값이 큰 정점부터 T에서 dfs를 진행한다. 이때 생긴 dfs 트리들이 각각 하나의 SCC이다.
+
+/*
+// code
+dfs함수, rdfs함수 출처: https://seungkwan.tistory.com/7 [Seungkwan's Lab.]
+
+int V, E;
+vector<int> G[10001];
+vector<int> T[10001];
+vector<vector<int>> scc;
+int cur_time; // finish time 체크를 위한 시간 변수
+int ft2vtx[10001]; // ft2vtx[n] = finish time이 n인 정점의 번호
+bool visit[10001]; // 방문 체크 배열
+void dfs(int here)
+{
+    visit[here] = true;
+    for (int there : G[here])
+    {
+        if(!visit[there])
+            dfs(there);
+    }
+    ft2vtx[++cur_time] = here;
+}
+ 
+// 역방향 dfs
+void rdfs(int here, vector<int>& newscc)
+{
+    newscc.push_back(here);
+    visit[here] = true;
+    for (int there : T[here])
+    {
+        if(!visit[there])
+            rdfs(there, newscc);
+    }
+}
+
+*/
+
+=========================================================================================
+<Tarjan's Algorithm>
+
+- 타잔 알고리즘은 dfs를 수행할 때 생성되는 dfs 트리의 간선의 정보를 이용하는 알고리즘으로, 위상정렬과 유사하게 진행된다.
+- dfs가 진행됨에 따라서 scc를 찾는 알고리즘이므로 선형적인 시간, O(V+E)가 걸린다.
+
+1. 아직 dfs가 호출되지 않은 정점에 대해서 dfs를 호출한다.
+2. 아직 방문하지 않은 정점이 존재하면 재귀적으로 dfs를 호출하면서 dfs의 호출 순서에 따라서 정점을 스택에 push한다.
+3. 2번 과정에서 stack에 push함과 low-link value를 현재 노드번호와 같게 기록해나간다.(이는 노드가 어떤 scc에 속하는지를 알려주는 번호이다)
+4. 방문하지 않은 정점이 더이상 없어서 dfs callback이 일어날 때, 이전 노드가 스택에 있었다면, 현재 노드의 low-link value를 이전 노드의 low-link value와 비교하여 더 작은 값을 저장한다.
+5. 모든 방문이 이루어진 뒤, 현재 노드가 SCC의 시작 단위였다면(low-link value와 노드 번호가 동일), 시작노드에 도달할 때까지 스택에서 pop을 한다.
+
+/*
+// code
+
+출처: https://jason9319.tistory.com/98 [ACM-ICPC 상 탈 사람]
+
+int v, e, discover[10001], scccount, id, scc[10001];
+stack<int> st;
+vector<vector<int>> vt;
+vector<vector<int>> res;
+bool cmp(vector<int> a, vector<int> b) {
+    return a[0] < b[0];
+}
+int dfs(int here) {
+    discover[here] = id++;
+    int ret = discover[here];
+    st.push(here);
+    for (int there : vt[here]) {
+        if (discover[there] == -1)
+            ret = min(ret, dfs(there));
+        else if (scc[there] == -1)
+            ret = min(ret, discover[there]);
+    }
+    if (ret == discover[here]) {
+        vector<int> tmp;
+        while (1) {
+            int t = st.top();
+            st.pop();
+            scc[t] = scccount;
+            tmp.push_back(t);
+            if (t == here)break;
+        }
+        sort(tmp.begin(), tmp.end());
+        res.push_back(tmp);
+        scccount++;
+    }
+    return ret;
+}
+
+
+*/

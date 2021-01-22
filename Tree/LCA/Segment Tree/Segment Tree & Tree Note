@@ -1,0 +1,7 @@
+<Segment Tree & Tree Note>
+
+- dfs를 이용해서 lca를 구하는 알고리즘으로 tin, tout을 채운 후, dfs 방문번호를 바탕으로 tree[]를 채울 수 있다.
+- tree는 tin~tout의 구간에 대한 정보를 갖고 있는 세그먼트 트리이다.
+
+- 세그먼트트리에서 구간 업데이트가 진행되므로 lazy propagation을 이용해야한다.
+

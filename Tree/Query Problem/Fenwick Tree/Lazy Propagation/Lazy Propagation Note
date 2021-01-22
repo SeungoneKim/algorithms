@@ -1,0 +1,75 @@
+<Lazy Propagation Note>
+
+- 펜윅 트리에서 구간의 업데이트를 효율적으로 하는 방법이다.
+
+
+1. 구간을 업데이트 하고, 쿼리는 구간이 아닌 경우
+ 
+/*
+// code
+void update(vector<long long> &tree,int x,int y,long long diff){
+    update(tree,x,diff);
+    update(tree,y+1,-diff);
+}
+*/
+
+- 펜윅트리에서는 update(tree,x,diff)가 x이상의 모든 값에 영향을 준다.
+- update(tree,y+1,-diff)를 통해서 y+1 이상의 모든 값을 더해지지 않은 상태로 만들 수 있다.
+
+- 변화된 a[index]는 a[index]+sum(tree,index)를 통해서 구할 수 있댜.
+- 기존의 sum(i)는 1~i까지의 합이 아닌 i 위치의 누적합을 출력하게 된다.
+
+/*
+// full code
+
+long long sum(vector<long long> &tree, int x) {
+    long long ans = 0;
+    for (int i=x; i>0; i -= i&-i) {
+        ans += tree[i];
+    }
+    return ans;
+}
+void update(vector<long long> &tree, int x, long long diff) {
+    for (int i=x; i<tree.size(); i += i&-i) {
+        tree[i] += diff;
+    }
+}
+void update(vector<long long> &tree, int x, int y, long long diff) {
+    update(tree, x, diff);
+    update(tree, y+1, -diff);
+}
+
+*/
+
+2. 구간도 업데이트 하고, 쿼리도 구간인 경우
+
+- 트리가 2개 필요하다.
+
+/*
+long long sum(vector<long long> &tree, int x) {
+    long long ans = 0;
+    for (int i=x; i>0; i -= i&-i) {
+        ans += tree[i];
+    }
+    return ans;
+}
+void update(vector<long long> &tree, int x, long long diff) {
+    for (int i=x; i<tree.size(); i += i&-i) {
+        tree[i] += diff;
+    }
+}
+void update(vector<long long> &tree1, vector<long long> &tree2, int x, int y, long long diff) {
+    update(tree1, x, diff);
+    update(tree1, y+1, -diff);
+    update(tree2, x, diff*(x-1));
+    update(tree2, y+1, -diff*y);
+}
+long long range_sum(vector<long long> &tree1, vector<long long> &tree2, int x) {
+    return sum(tree1, x) * x - sum(tree2, x);
+}
+long long range_sum(vector<long long> &tree1, vector<long long> &tree2, int x, int y) {
+    return range_sum(tree1, tree2, y) - range_sum(tree1, tree2, x-1);
+}
+*/
+
+- tree1,tree2는 수식적인 계산을 통해 미리 알면 연산이 빨라지는 값들을 저장해놓은 구조이다.

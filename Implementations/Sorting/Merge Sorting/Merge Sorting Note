@@ -1,0 +1,32 @@
+<Merge Sorting Note>
+
+- N개를 정렬하는 알고리즘이다.
+- O(NlgN)의 시간복잡도가 걸린다.
+
+- N개를 N/2, N/2개로 계속 나누고 각각을 정렬한 후, 정렬한 결과를 하나로 합친다.
+
+- 머지 소트에서 배열을 합치는 알고리즘은 정렬된 2개의 배열에서 앞 원소끼리를 비교하면서 합치면 된다.
+
+void sort(int start, int end){
+    if(start == end){
+        return;
+    }
+    int mid=(start+end)/2;
+    sort(start,mid);
+    sort(mid+1,end);
+    merge(start,end);
+}
+
+void merge(int start,int end){
+    int mid=(start+end)/2;
+    int i=start, j=mid+i,k=0;
+    while(i<=mid && j<=end){
+        if(a[i] <= a[j]) b[k++]=a[i++];
+        else b[k++]=a[j++];
+    }
+    while(i<=mid) b[k++] = a[i++];
+    while(j<=end) b[k++] = a[j++];
+    for(int i=start; i<=end; i++){
+        a[i]=b[i-start];
+    }
+}

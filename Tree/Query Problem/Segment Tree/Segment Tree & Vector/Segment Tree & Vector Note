@@ -1,0 +1,34 @@
+<Segment Tree & Vector Note>
+
+- 세그먼트 트리의 각 노드가 vector인 경우이다.
+- 세그먼트 트리의 노드 (node,start,end)는 A[start]부터 A[end]까지를 정렬하여서 가지고 있는 것이다.
+
+- 머지 소트의 각 과정이 노드로 저장되어 있는 것으로 생각할 수도 있다.
+
+/*
+// code
+
+void init(vector<int>&a, int node, int start,int end){
+    if(start==end){
+        tree[node].push_back(a[start]);
+        return;
+    }
+    int mid=(start+end)/2;
+    init(a,node*2,start,mid);
+    init(a,node*2+1,mid+1,end);
+
+    merge(tree[node*2].begin(),tree[node*2].end(),tree[node*2+1].begin(),tree[node*2+1].end(),back_inserter(tree[node]));
+}
+
+int query(int node, int start, int end, int i, int j, int k){
+    if(i>end || j<start) return 0;
+
+    if(i<=start && end<=j){
+        return tree[node].size()-(upper_bound(tree[node].begin(),tree[node].end(),k)-tree[node].begin());
+    }
+    int mid=(start+end)/2;
+
+    return query(node*2,start,mid,i,j,k)+query(node*2+1,mid+1,end,i,j,k);
+}
+
+*/

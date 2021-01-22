@@ -1,0 +1,48 @@
+<Permutation Note>
+
+- 브루트 포스문제를 푸는데 순서가 중요한 의미를 가질 때 사용할 수 있는 기법.
+
+- 크기가 N인 수열의 서로 다른 순열은 N!개 있다.
+
+#include<algorithm>
+- next_permutation, prev_permutation
+
+<구현방법>
+1. a[i-1] < a[i]를 만족하는 가장 큰 i를 찾는다.
+2. j>=i 이면서 a[j]>a[i-1]를 만족하는 가장 큰 j를 찾는다. (a[j]는 순열에서 a[i-1]다음으로 큰 수가 된다.)
+3. a[i-1]과 a[j]를 swap한다.
+4. a[i]부터 순열을 뒤집는다.  
+
+- 이 방법은 O(N*N!)만큼의 시간이 걸린다.
+
+/*
+// next_permutation code
+bool next_permutation(int *a,int n){
+    int i=n-1;
+    while(i>0 && a[i-1]>=a[i]) i--;
+    int j=n-1;
+    while(a[j]<=a[i-1]) j--;
+    swap(a[i-1],a[j]);
+    j=n-1;
+    whlie(i<j){
+        swap(a[i],a[j]);
+        i++; j--;
+    }
+    return true;
+}
+
+// usage of permutation
+do{
+
+        for(int k=0;k<n;k++){
+            cout << permu[k];
+            if(k<n-1){
+                cout << ' ';
+            }
+        }
+        cout << '\n';
+    }while(next_permutation(permu.begin(),permu.end()));
+*/
+
+- 순열을 응용하면 선택과 관련있는 문제를 순서와 관련있는 문제로 바꾸어서 풀 수 있다.
+- 선택한 상태를 1, 선택하지 않은 상태를 0이라고 지정하여 1과 0로 구성된 순열을 배열하면 된다.

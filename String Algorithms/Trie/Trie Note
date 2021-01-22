@@ -1,0 +1,75 @@
+<Trie Note>
+- 숫자 비교는 O(1)이지만, 문자열 비교는 최대 O(길이)가 걸린다.
+
+- 따라서, 문자열 N개를 담고있는 BST에서 검색하는데 걸리는 시간은 O(lgN * 길이)가 된다.
+
+- Trie는 이를 해결하기 위한 자료구조이다.
+- Trie의 한 노드는 어떤 문자열의 접두사를 나타낸다.
+- 따라서, Trie는 Prefix Tree라고도 한다.
+
+ex) abc에서 abd를 추가하는 경우 + ace를 추가하는 경우
+                                -
+            a       
+    ab              ac
+abc    abd              ace
+
+/*
+//code
+
+struct Trie {
+    struct Node {
+        int children[26];
+        bool valid;
+        Node() {
+            for (int i = 0; i<26; i++) {
+                children[i] = -1;
+            }
+            valid = false;
+        }
+    };
+    vector<Node> trie;
+    int root;
+    int init() {
+        Node x;
+        trie.push_back(x);
+        return (int)trie.size() - 1;
+    }
+    Trie() {
+        root = init();
+    }
+    void add(int node, string &s, int index) {
+        if (index == s.size()) {
+            trie[node].valid = true;
+            return;
+        }
+        int c = s[index] - 'a';
+        if (trie[node].children[c] == -1) {
+            int next = init();
+            trie[node].children[c] = next;
+        }
+        int child = trie[node].children[c];
+        add(child, s, index + 1);
+    }
+    void add(string &s) {
+        add(root, s, 0);
+    }
+    bool search(int node, string &s, int index) {
+        if (node == -1) return false;
+        if (index == s.length()) return trie[node].valid;
+        int c = s[index]-'a';
+        int child = trie[node].children[c];
+        return search(child, s, index+1);
+    }
+    bool search(string &s) {
+        return search(root, s, 0);
+    }
+};
+
+*/
+
+- node는 탐색하고 있는 노드의 인덱스를 의미한다.
+- s는 추가하려는 문자열, index는 s의 몇번째 index를 추가하고 있는지를 의미한다.
+
+
+- Trie에서 depth는 문자열의 길이를 의미한다.
+- Trie에서 수행되는 연산들의 시간복잡도는 O(문자열의 길이)과 같다.

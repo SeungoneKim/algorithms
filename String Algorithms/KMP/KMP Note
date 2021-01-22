@@ -1,0 +1,98 @@
+<KMP Note>
+
+- KMP는 실패 함수를 이용하는 문자열 검색 알고리즘이다.
+
+- fail함수는 P의 i까지 부분 문자열에서 prefix==suffix가 될 수 있는 부분 문자열 중에서 가장 긴 것의 길이를 저정한다.
+- fail[0]=0은 항상 성립한다.
+
+ex) ABCABE
+prefix(접두사):
+A
+AB
+ABC
+ABCA
+ABCAB
+ABCABE
+
+suffix(접미사):
+E
+BE
+ABE
+CABE
+BCABE
+ABCABE
+
+fail[0]=0, A
+fail[1]=0, AB
+fail[2]=0, ABC
+fail[3]=1, ABCA -> A=A
+fail[4]=2, ABCAB -> AB=AB
+fail[5]=0, ABCABE
+
+- 가장 긴 것만 저장하는 이유는 긴 것을 저장하면 짧은 것에 대한 정보를 알 수 있기 때문이다.
+
+- fail[i]를 결정할때에, 새로 추가하는 문자가 fail[i-1]번째 문자와 같으면 fail[i]=fail[i-1]+1이 성립한다.
+
+- 새로 추가하는 문자가 fail[i-1]번째 문자와 다르면 무조건 fail[i]=0인 것은 아니다.
+- 이전에 저장한 짧은 것에 대한 정보를 바탕으로 fail[i]를 채울 수 있다.
+
+- 새로 추가하는 문자가 fail[i-1]번째 문자와 다르면 추가적인 과정이 동반된다.
+- 새로 추가되는 문자가 fail[fail[i-1]-1]번째 문자와 같으면 fail[i]=fail[fail[i-1]-1]+1이 성립한다.
+- fail[@-1]와 비교하여 같으면 fail[i]=fail[@-1]로 정하는 작업을 찾을때까지 반복해 주어야 한다.
+ 
+/*
+//code
+
+vector<int> preprocessing(string p){
+    int m=p.size();
+    vector<int>pi(m);
+    pi[0]=0;
+    int j=0;
+
+    for(int i=1;i<m;i++){
+        while(j>0 && p[i]!=p[j]) j=pi[j-1];
+        if(p[i]==p[j]){
+            pi[i] = j+1;
+            j += 1;
+        }
+        else{
+            pi[i]=0;
+        }
+    }
+    return pi;
+}
+
+- j는 p번 증가하고, 최대 p번 감소할 수 있다.
+- 따라서, 시간복잡도는 O(P)가 성립한다.
+
+
+
+- KMP를 문자열 검색 알고리즘으로 활용할 수 있다.
+- fail[4]=2라는 것은 p[0..1]==p[3..4]라는 것을 의미한다.
+
+- 패턴 ABCABE를 찾는 경우를 생각해보자.
+- ABCABD/ABCABCABEF 에서 i=5일때, j=2이다.
+- 이때, i-j인 3번째를 시작으로 하여서 5번째 문자부터 다시 비교를 시작하면 된다. 
+
+/*
+// code
+
+vector<int> kmp(string s, string p){
+    auto pi= preprocessing(p);
+    vector<int> ans;
+    int n=s.size(), m=p.size(), i=0, j=0;
+    for(int i=0;i<n;i++){
+        while(j>0 && s[i]!=p[j]){ j = pi[j-1]; }
+        if(s[i]==p[j]){
+            if(j==m-1){
+                ans.push_back(i-m+1); j=pi[j];
+            }
+            else{
+                j += 1;
+            }
+        }
+    }
+    return ans;
+}
+
+- 이를 사용하면 시간 복잡도가 O(S+P)라 할수 있다.

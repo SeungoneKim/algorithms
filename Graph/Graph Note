@@ -1,0 +1,57 @@
+<Graph Note>
+
+- 그래프 알고리즘은 프로그래밍 방법론에 가까운 DP, Brute-Force와 달리 모델링에 초점을 둔다.
+- 어떠한 상황을 어떻게 그래프로 나타내어 표현하는지가 매우 중요하다.
+
+
+- 그래프를 다음과 같은 기준으로 크게 분류할 수 있다.
+- 그래프 문제가 주어졌을 때, 아래 3가지 기준을 바탕으로 체크하고 문제를 푸는것이 바람직하다.
+
+1. 간선에 방향이 있는 그래프(Directed Graph) / 방향이 없는 그래프(Undirected Graph) : 간선에 방향특성
+2. 간선에 가중치가 있는 그래프 / 간선에 가중치가 없는 그래프 : 간선에 실수특성 (음수 가중치가 있는지 확인한다.)
+3. 사이클이 존재하는 그래프 / 사이클이 존재하지 않는 그래프
+
+- 그래프를 표현하는 방법은 인접행렬과 인접리스트가 있다.
+- 간선리스트도 있지만 잘 쓰이지 않는다.
+
+/*
+그래프의 표현(Representation of Graph)
+// 인접행렬code
+int mat[101][101]; // 가중치 없으면 bool mat[101][101];
+
+for(int k=1;k<=edge;k++){
+    int a,b,w;
+    cin >> a >> b >> w;
+    mat[a][b]=w; mat[b][a]=w;
+}
+
+
+// 인접리스트code
+vector<pair<int,int>> adjlist[100]; // 가중치 없으면 vector<int> adjlist[100];
+
+for(int k=0;k<edge;k++){
+    int a,b,w;
+    cin >> a >> b >> w;
+    adjlist[a].push_back(make_pair(b,w));
+    adjlist[b].push_back(make_pair(a,w));
+}
+
+// 간선리스트code
+vector<int> edgelist(100);
+int cnt[100];
+
+for(int k=0;k<edge;k++){
+    int a,b;
+    cin >> a >> b;
+    edgelist.push_back(make_pair(a,b));
+    edgelist.push_back(make_pair(b,a));
+    cnt[a]++;
+    cnt[b]++;
+}
+for(int k=1;k<vertex;k++){
+    cnt[k]+= cnt[k-1];
+}
+- 인접리스트의 구현을 위한 vector사용이 금지되어 있을 때 사용한다.
+
+*/
+

@@ -1,0 +1,64 @@
+<Aho-Corasick Note>
+
+- KMP는 문자열 S가 있을 때, 패턴 P를 찾는 알고리즘이다.
+- Trie는 문자열 N개가 있을 때, 문자열 S를 찾는 자료구조이다.
+
+- Aho-Corasick은 문자열 N개가 있을 때, 패턴 P를 찾는 알고리즘이다.
+
+- Trie를 만든 후, KMP를 수행하는 방법으로 구성되어 있다.
+- 이는 출석부에서 나랑 성이 같은 사람, 이름이 같은 사람을 찾기라고 생각할 수 있다.
+
+- Aho-Corasick은 KMP를 N번 수행하는 방법, O(N*(S+P))보다 효율적인 방법이다.
+
+- KMP에서의 fail[i] = S의 i까지의 부분 문자열(접두사)에서 prefix==suffix인 것 중에서 가장 긴 문자열의 길이
+- Trie에서 문자열 S를 추가하면 한글자씩 노드를 만들면서, S의 모든 접두사가 중간 노드로 생김.
+
+- Aho-Corasick에서 fail[node] = node가 나타내는 문자열 s의 suffix이면서, trie에 포함된 가장 긴 문자열
+
+
+ex) S= "ABCDEABABABABCD"일 때, "ABAB","AD","ABC","BCD","ABABC"가 몇 개 인지 찾는 문제
+
+1. ABAB,AD,ABC,BCD,ABABC를 trie에 추가해준다.
+2. 각 노드에 대해서 suffix중에서 trie에 있는지 찾아준다.
+3. 2의 과정에서 가장 긴 문자열을 연결해 주고, 만약에 존재하지 않으면 root를 연결해 준다.
+
+- 각 노드에서 연결된 다른 노드 중에서 valid한 것을 따로 저장하는 방법이다.
+
+- Aho-Corasick은 BFS를 이용하여서 순회해준다.
+/*
+//code
+
+struct Node {
+    int children[26];
+    int pi;
+    bool valid;
+    Node() {
+        for (int i=0; i<26; i++) {
+            children[i] = -1;
+        }
+        valid = false;
+        pi = -1;
+    }
+};
+vector<Node> trie;
+int init() {
+    Node x;
+    trie.push_back(x);
+    return (int)trie.size()-1;
+}
+void add(int node, string &s, int index) {
+    if (index == s.size()) {
+        trie[node].valid = true;
+        return;
+    }
+    int c = s[index] - 'a';
+    if (trie[node].children[c] == -1) {
+        int next = init();
+        trie[node].children[c] = next;
+    }
+    add(trie[node].children[c], s, index+1);
+}
+
+*/
+
+- 이 방법의 시간 복잡도는 O(N*P + S)가 된다.
